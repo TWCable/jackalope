@@ -1,5 +1,8 @@
 # Jackalope
 
+
+[ ![Download](https://api.bintray.com/packages/twcable/aem/jackalope/images/download.svg) ](https://bintray.com/twcable/aem/jackalope/_latestVersion)
+
 ## PURPOSE
 
 Jackalope is an in-memory implementation of the JCR with stubbing capabilities for Apache Sling.
@@ -129,12 +132,21 @@ Jackalope uses gradle as its build system:
 
 `./gradlew build`
 
+# Including In Your Build
+
 Jackalope can be used by including the following in your
-build files:
+build files (assuming Gradle):
 
 ```groovy
+repositories {
+  maven {
+    url "http://dl.bintray.com/twcable/aem"
+  }
+}
+
 testCompile 'com.twcable.jackalope:jackalope:2.0.0'
 ```
+
 # LICENSE
 
 Copyright 2015 Time Warner Cable, Inc.
