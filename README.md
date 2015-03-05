@@ -1,5 +1,6 @@
 # Jackalope
 
+[![Build Status](https://travis-ci.org/TWCable/jackalope.svg?branch=master)](https://travis-ci.org/TWCable/jackalope)
 
 [ ![Download](https://api.bintray.com/packages/twcable/aem/jackalope/images/download.svg) ](https://bintray.com/twcable/aem/jackalope/_latestVersion)
 
