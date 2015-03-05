@@ -133,7 +133,7 @@ Jackalope can be used by including the following in your
 build files:
 
 ```groovy
-testCompile 'com.twcable.jackalope:jackalope:1.1.0'
+testCompile 'com.twcable.jackalope:jackalope:2.0.0'
 ```
 # LICENSE
 
