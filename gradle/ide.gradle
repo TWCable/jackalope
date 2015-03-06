@@ -7,6 +7,11 @@ apply plugin: 'eclipse'
 //
 //*************************************************************************
 
+idea.module {
+    downloadJavadoc = true
+    downloadSources = true
+}
+
 idea.project {
     vcs = 'Git'
 

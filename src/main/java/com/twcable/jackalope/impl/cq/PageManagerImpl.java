@@ -85,6 +85,13 @@ public class PageManagerImpl implements PageManager {
 
     @Override
     public Page create(String parentPath, String pageName, String template, String title) throws WCMException {
+        return create(parentPath, pageName, template, title, true);
+    }
+
+
+    @Override
+    public Page create(String parentPath, String pageName, String template, String title,
+                       boolean autoSave) throws WCMException {
         if (parentPath == null) throw new IllegalArgumentException("Parent path can't be null.");
         if (pageName == null && title == null)
             throw new IllegalArgumentException("Page and title name can't be both null.");
@@ -102,7 +109,9 @@ public class PageManagerImpl implements PageManager {
             Node contentNode = pageNode.addNode("jcr:content", JcrConstants.CQ_PAGE_CONTENT);
 
             if (title != null && !title.isEmpty()) contentNode.setProperty("jcr:title", title);
-            session.save();
+            if (autoSave) {
+                session.save();
+            }
 
             return getPage(pageNode.getPath());
         }
@@ -227,15 +236,27 @@ public class PageManagerImpl implements PageManager {
 
     @Override
     public void delete(Page page, boolean shallow) throws WCMException {
+        delete(page, shallow, true);
+    }
+
+
+    @Override
+    public void delete(Page page, boolean shallow, boolean autoSave) throws WCMException {
         if (page == null) return;
 
-        if (!shallow) delete(page.adaptTo(Resource.class), false);
-        else delete(page.getContentResource(), true);
+        if (!shallow) delete(page.adaptTo(Resource.class), false, autoSave);
+        else delete(page.getContentResource(), true, autoSave);
     }
 
 
     @Override
     public void delete(Resource resource, boolean shallow) throws WCMException {
+        delete(resource, shallow, true);
+    }
+
+
+    @Override
+    public void delete(Resource resource, boolean shallow, boolean autoSave) throws WCMException {
         if (resource == null) return;
 
         Node node = resource.adaptTo(Node.class);
@@ -243,7 +264,9 @@ public class PageManagerImpl implements PageManager {
 
         try {
             session.removeItem(node.getPath());
-            session.save();
+            if (autoSave) {
+                session.save();
+            }
         }
         catch (RepositoryException e) {
             throw new WCMException("Could not delete resource.", e);
@@ -252,13 +275,27 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public void order(Page page, String s) throws WCMException {
-        throw new UnsupportedOperationException();
+    public void order(Page page, String beforeName) throws WCMException {
+        order(page, beforeName, true);
     }
 
 
     @Override
-    public void order(Resource resource, String s) throws WCMException {
+    public void order(Page page, String beforeName, boolean autoSave) throws WCMException {
+        if (page == null) return;
+
+        order(page.getContentResource(), beforeName, autoSave);
+    }
+
+
+    @Override
+    public void order(Resource resource, String beforeName) throws WCMException {
+        order(resource, beforeName, true);
+    }
+
+
+    @Override
+    public void order(Resource resource, String beforeName, boolean autoSave) throws WCMException {
         throw new UnsupportedOperationException();
     }
 

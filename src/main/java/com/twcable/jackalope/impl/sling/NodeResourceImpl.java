@@ -115,6 +115,18 @@ public class NodeResourceImpl extends ItemResourceImpl {
 
 
     @Override
+    public boolean hasChildren() {
+        return listChildren().hasNext();
+    }
+
+
+    @Override
+    public ValueMap getValueMap() {
+        return this.adaptTo(ValueMap.class);
+    }
+
+
+    @Override
     @SuppressWarnings({"unchecked", "deprecation"})
     public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
         if (type.equals(Node.class)) return (AdapterType)node;

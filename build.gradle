@@ -29,30 +29,20 @@ sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 
 
-def cq_version = "5.6.2"
-def jackrabbit_version = "2.6.2"
-
 dependencies {
-    compile "javax.jcr:jcr:2.0"
-    compile "org.apache.jackrabbit:jackrabbit-api:${jackrabbit_version}"
-    compile "org.apache.jackrabbit:jackrabbit-jcr-commons:${jackrabbit_version}"
-    compile "org.apache.sling:org.apache.sling.api:2.4.3-R1488084"
-    compile "org.apache.sling:org.apache.sling.jcr.api:2.1.0"
-    compile "org.apache.sling:org.apache.sling.jcr.resource:2.2.8"
-    compile "com.day.commons:day-commons-text:1.1.8"
-    compile "com.day.cq.wcm:cq-wcm-api:${cq_version}"
-    compile "com.day.cq:cq-commons:${cq_version}", {
-        exclude group: 'org.apache.commons', module: 'commons-email'
+
+    // AEM's new "uber-jar"
+    compile "com.adobe.aem:aem-api:6.0.0.1", {
+        exclude group: "org.slf4j", module: "slf4j-simple"
+        exclude group: "com.adobe.cq.testing", module: "cq-integration-testing"
     }
-    compile "com.day.cq.wcm:cq-wcm-core:${cq_version}"
-    compile "com.day.cq:cq-tagging:${cq_version}"
-    compile "com.day.cq.dam:cq-dam-api:5.6.6"
-    compile "com.day.cq.dam:cq-dam-core:5.6.14"
-    compile "com.day.cq.dam:cq-dam-commons:5.6.8"
+
+    compile "javax.jcr:jcr:2.0"
+    compile "com.google.guava:guava:15.0"
+    compile "org.apache.sling:org.apache.sling.jcr.resource:2.3.8"
     compile "org.slf4j:slf4j-api:1.6.6"
-    compile "com.google.guava:guava:11.0.1"
     compile "javax.servlet:servlet-api:2.5"
-    compile "commons-io:commons-io:1.4"
+    compile "commons-io:commons-io:2.4"
 
     // @Nonnull @Nullable etc annotations
     compile "com.google.code.findbugs:jsr305:2.0.1"
