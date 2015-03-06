@@ -19,6 +19,7 @@ package com.twcable.jackalope.impl.sling;
 import com.twcable.jackalope.impl.common.Values;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
@@ -51,6 +52,18 @@ public class PropertyResourceImpl extends ItemResourceImpl {
         catch (RepositoryException re) {
             throw new SlingRepositoryException(re);
         }
+    }
+
+
+    @Override
+    public boolean hasChildren() {
+        return false;
+    }
+
+
+    @Override
+    public ValueMap getValueMap() {
+        return null;
     }
 
 

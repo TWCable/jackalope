@@ -47,4 +47,11 @@ public class SimpleResourceResolverFactory implements ResourceResolverFactory {
     public ResourceResolver getAdministrativeResourceResolver(Map<String, Object> authenticationInfo) throws LoginException {
         return this.resourceResolver;
     }
+
+
+    @Override
+    public ResourceResolver getServiceResourceResolver(Map<String, Object> authenticationInfo) throws LoginException {
+        return this.resourceResolver;
+    }
+
 }

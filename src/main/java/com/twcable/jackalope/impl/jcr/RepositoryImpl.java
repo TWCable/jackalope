@@ -108,4 +108,11 @@ public class RepositoryImpl implements SlingRepository {
     public Session loginAdministrative(String workspace) throws RepositoryException {
         return session;
     }
+
+
+    @Override
+    public Session loginService(String s, String s1) throws LoginException, RepositoryException {
+        return session;
+    }
+
 }

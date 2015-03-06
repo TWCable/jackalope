@@ -52,7 +52,7 @@ public class ResourceResolverImpl implements ResourceResolver {
     public ResourceResolverImpl(@Nonnull SlingRepository repository) {
         if (repository == null) throw new IllegalArgumentException("Repository cannot be null.");
         try {
-            this.session = repository.loginAdministrative(null);
+            this.session = repository.login();
         }
         catch (RepositoryException re) {
             throw new SlingRepositoryException(re);
@@ -138,6 +138,12 @@ public class ResourceResolverImpl implements ResourceResolver {
     @Override
     public Iterator<Map<String, Object>> queryResources(String query, String language) {
         return null;  //TODO: Implement queries
+    }
+
+
+    @Override
+    public boolean hasChildren(Resource resource) {
+        return listChildren(resource).hasNext();
     }
 
 
