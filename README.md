@@ -135,6 +135,8 @@ Jackalope uses gradle as its build system:
 
 # Including In Your Build
 
+[ ![Download](https://api.bintray.com/packages/twcable/aem/jackalope/images/download.svg) ](https://bintray.com/twcable/aem/jackalope/_latestVersion)
+
 Jackalope can be used by including the following in your
 build files (assuming Gradle):
 
@@ -145,7 +147,7 @@ repositories {
   }
 }
 
-testCompile 'com.twcable.jackalope:jackalope:2.0.0'
+testCompile 'com.twcable.jackalope:jackalope:3.0.0'
 ```
 
 # LICENSE
