@@ -1,4 +1,4 @@
-# Jackalope
+![Jackalope](jackalope.png)
 
 [![Build Status](https://travis-ci.org/TWCable/jackalope.svg?branch=master)](https://travis-ci.org/TWCable/jackalope)
 
