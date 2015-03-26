@@ -15,14 +15,19 @@ Simple mocking of the underlying JCR and Sling interfaces *can* be used to unit 
 these kinds of objects. However, when object aggregations like Sling component structures need to be
 represented, the inability of simple mock objects to manage state become a real limitation.
 
-The obvious solution is to use a JCR implementation that uses memory as its storage.
-There are, in fact, memory-based JCR implementations -- including one that is distributed with the Jackrabbit project.
-(Jackrabbit is the reference implementation for the JCR JSR.) All of these, however, require far too much in both
-setup and resources to be useful for unit testing. They are designed to be long running, multi-threaded processes.
+The obvious solution is to use a JCR implementation that uses memory as its storage. There are, in fact, memory-based JCR implementations -- including one that is distributed with the Jackrabbit project. (Jackrabbit is the reference implementation for the JCR JSR.) All of these, however, require far too much in setup and resources to be useful for unit testing. They are designed to be long running, multi-threaded processes.
 
 Our solution to this problem is to develop a simple and fast JCR implementation that can be used in unit tests.
-It does not implement the complete JCR spec, such as locking, transactions, versioning, or search.
-It does, however, support the basic facilities for reading and writing repository workspaces.
+It does not implement the complete JCR spec, but just the parts that we've needed, including the basic facilities for reading and writing repository workspaces.
+
+There is another great project from [Citytech called Prosper](https://github.com/Citytechinc/prosper), which was released after Jackalope was written internally at Time Warner Cable. Each project has its own set of features, but the *primary* difference between Jackalope and Prosper is that Prosper uses Groovy string-based metaprogramming for building its trees, which has all the advantages and disadvantages of a fully dynamic API. Choose the one that best your needs/style: Choice is good. :-)
+
+
+## Versions
+
+The 3.x line targets AEM 6.x, whereas the 2.x versions target AEM 5.6.
+
+Versioning follows the [Semantic Versioning standard](http://semver.org/)
 
 ## Packages
 
