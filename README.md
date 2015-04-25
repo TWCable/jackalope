@@ -59,38 +59,39 @@ This package contains the classes that implement the primary JCR API classes lik
 ### Building and using a partial repository
 
 ```groovy
+given:
 def repository = repository(
-                     node("content",
-                         node("test1",
-                             node("callingrates",
-                                 node("intl-direct-dial",
-                                     property("sling:resourceType", "admin/components/content/callingratetable"),
-                                     node("france",
-                                         property("sling:resourceType", "admin/components/content/callingrate"),
-                                         property("additional-minute-rate", "0.60"))))))).build()
-def resolver = new SimpleResourceResolverFactory(repository).getAdministrativeResourceResolver()
+    node("content",
+        node("test1",
+            node("callingrates",
+                node("intl-direct-dial",
+                    property("sling:resourceType", "admin/components/content/callingratetable"),
+                    node("france",
+                        property("sling:resourceType", "admin/components/content/callingrate"),
+                        property("additional-minute-rate", "0.60"))))))).build()
+def resolver = new SimpleResourceResolverFactory(repository).administrativeResourceResolver
 def resource = resolver.getResource("/content/test1/callingrates/intl-direct-dial")
 
-given:
+when:
 def callingRateTable = new CallingRateTable(resource)
 
 then:
 callingRateTable.getRate("france")
-callingRateTable.getRate("france").getAdditionalMinuteRate() == "0.60"
+callingRateTable.getRate("france").additionalMinuteRate == "0.60"
 ```
 
 The resource resolver factory can be used to test servlets and services by injection.
 
 ```groovy
 def repository = repository(
-                     node("content",
-                         node("test1",
-                             node("callingrates",
-                                 node("intl-direct-dial",
-                                     property("sling:resourceType", "admin/components/content/callingratetable"),
-                                     node("france",
-                                         property("sling:resourceType", "admin/components/content/callingrate"),
-                                         property("additional-minute-rate", "0.60"))))))).build()
+    node("content",
+        node("test1",
+            node("callingrates",
+                node("intl-direct-dial",
+                    property("sling:resourceType", "admin/components/content/callingratetable"),
+                    node("france",
+                        property("sling:resourceType", "admin/components/content/callingrate"),
+                        property("additional-minute-rate", "0.60"))))))).build()
 def servlet = new CallingRatesImportServlet(new SimpleResourceResolverFactory(repository))
 ```
 
@@ -117,16 +118,16 @@ with fixed result sets that can be used for testing.
 
 ```groovy
 def node = node("result").build()
-JCRQueryBuilder.queryManager(node.getSession(), query("query", "language", result(node))).build()
+JCRQueryBuilder.queryManager(node.session, query("query", "language", result(node))).build()
 
 when:
-def queryResult = node.getSession().getWorkspace().getQueryManager().createQuery("query", "language").execute()
+def queryResult = node.session.workspace.queryManager.createQuery("query", "language").execute()
 
 then:
-queryResult.getNodes().hasNext()
+queryResult.nodes.hasNext()
 
 when:
-def results = Lists.newArrayList(queryResult.getNodes())
+def results = Lists.newArrayList(queryResult.nodes)
 
 then:
 results[0] == node
