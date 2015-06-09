@@ -17,10 +17,14 @@
 package com.twcable.jackalope.impl.jcr;
 
 import com.twcable.jackalope.impl.common.Paths;
+import org.apache.jackrabbit.spi.Name;
+import org.apache.jackrabbit.spi.commons.conversion.DefaultNamePathResolver;
+import org.apache.jackrabbit.spi.commons.conversion.NamePathResolver;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import javax.annotation.Nonnull;
+import javax.jcr.AccessDeniedException;
 import javax.jcr.Credentials;
 import javax.jcr.InvalidSerializedDataException;
 import javax.jcr.Item;
@@ -28,6 +32,7 @@ import javax.jcr.ItemExistsException;
 import javax.jcr.ItemNotFoundException;
 import javax.jcr.LoginException;
 import javax.jcr.NamespaceException;
+import javax.jcr.NamespaceRegistry;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Property;
@@ -47,6 +52,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +73,8 @@ public class SessionImpl implements Session {
     private Set<String> changedItems = new HashSet<>();
 
     private Workspace workspace = null;
+    private NamespaceRegistry namespaceRegistry = null;
+    private DefaultNamePathResolver namePathResolver;
 
 
     @Override
@@ -96,11 +104,25 @@ public class SessionImpl implements Session {
     @Override
     public Workspace getWorkspace() {
         if (workspace == null) {
-            WorkspaceImpl workspaceImpl = new WorkspaceImpl();
-            workspaceImpl.setSession(this);
-            workspace = workspaceImpl;
+            workspace = new WorkspaceImpl(this);
         }
         return workspace;
+    }
+
+
+    public NamespaceRegistry getNamespaceRegistry() {
+        if (namespaceRegistry == null) {
+            namespaceRegistry = new MyNamespaceRegistry();
+        }
+        return namespaceRegistry;
+    }
+
+
+    public NamePathResolver getNamePathResolver() {
+        if (namePathResolver == null) {
+            namePathResolver = new DefaultNamePathResolver(getNamespaceRegistry());
+        }
+        return namePathResolver;
     }
 
 
@@ -265,24 +287,25 @@ public class SessionImpl implements Session {
 
     @Override
     public void setNamespacePrefix(String prefix, String uri) throws NamespaceException, RepositoryException {
+        namespaceRegistry.registerNamespace(prefix, uri);
     }
 
 
     @Override
     public String[] getNamespacePrefixes() throws RepositoryException {
-        return new String[0];
+        return namespaceRegistry.getPrefixes();
     }
 
 
     @Override
     public String getNamespaceURI(String prefix) throws NamespaceException, RepositoryException {
-        return null;
+        return namespaceRegistry.getURI(prefix);
     }
 
 
     @Override
     public String getNamespacePrefix(String uri) throws NamespaceException, RepositoryException {
-        return null;
+        return namespaceRegistry.getPrefix(uri);
     }
 
 
@@ -423,4 +446,63 @@ public class SessionImpl implements Session {
     boolean isModified(ItemImpl item) {
         return changedItems.contains(item.getPath());
     }
+
+
+    private static class MyNamespaceRegistry implements NamespaceRegistry {
+        private final Map<String, String> prefixToUri = new HashMap<>();
+
+
+        public MyNamespaceRegistry() {
+            prefixToUri.put(Name.NS_JCR_PREFIX, Name.NS_JCR_URI);
+            prefixToUri.put(Name.NS_MIX_PREFIX, Name.NS_MIX_URI);
+            prefixToUri.put(Name.NS_NT_PREFIX, Name.NS_NT_URI);
+            prefixToUri.put(Name.NS_REP_PREFIX, Name.NS_REP_URI);
+        }
+
+
+        @Override
+        public void registerNamespace(String prefix, String uri) throws NamespaceException, UnsupportedRepositoryOperationException, AccessDeniedException, RepositoryException {
+            prefixToUri.put(prefix, uri);
+        }
+
+
+        @Override
+        public void unregisterNamespace(String prefix) throws NamespaceException, UnsupportedRepositoryOperationException, AccessDeniedException, RepositoryException {
+            prefixToUri.remove(prefix);
+        }
+
+
+        @Override
+        public String[] getPrefixes() throws RepositoryException {
+            Set<String> keySet = prefixToUri.keySet();
+            return keySet.toArray(new String[keySet.size()]);
+        }
+
+
+        @Override
+        public String[] getURIs() throws RepositoryException {
+            Collection<String> values = prefixToUri.values();
+            return values.toArray(new String[values.size()]);
+        }
+
+
+        @Override
+        public String getURI(String prefix) throws NamespaceException, RepositoryException {
+            String uri = prefixToUri.get(prefix);
+            if (uri == null) {
+                throw new NamespaceException(prefix);
+            }
+            return uri;
+        }
+
+
+        @Override
+        public String getPrefix(String uri) throws NamespaceException, RepositoryException {
+            for (Map.Entry<String, String> entry : prefixToUri.entrySet()) {
+                if (entry.getValue().equalsIgnoreCase(uri)) return entry.getKey();
+            }
+            throw new NamespaceException(uri);
+        }
+    }
+
 }

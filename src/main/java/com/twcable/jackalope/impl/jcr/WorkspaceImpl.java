@@ -46,10 +46,16 @@ import java.io.InputStream;
  */
 @SuppressWarnings("DuplicateThrows")
 public class WorkspaceImpl implements Workspace {
-    private Session session = null;
+    private SessionImpl session = null;
     private ObservationManager observationManager = null;
+    private NodeTypeManager nodeTypeManager = null;
 
     protected QueryManager queryManager = null;
+
+
+    public WorkspaceImpl(SessionImpl session) {
+        this.session = session;
+    }
 
 
     @Override
@@ -103,13 +109,16 @@ public class WorkspaceImpl implements Workspace {
 
     @Override
     public NamespaceRegistry getNamespaceRegistry() throws RepositoryException {
-        return null;
+        return session.getNamespaceRegistry();
     }
 
 
     @Override
     public NodeTypeManager getNodeTypeManager() throws RepositoryException {
-        return null;
+        if (nodeTypeManager == null) {
+            nodeTypeManager = new NodeTypeManagerImpl();
+        }
+        return nodeTypeManager;
     }
 
 
@@ -160,12 +169,8 @@ public class WorkspaceImpl implements Workspace {
     }
 
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-
     public void setQueryManager(QueryManager queryManager) {
         this.queryManager = queryManager;
     }
+
 }

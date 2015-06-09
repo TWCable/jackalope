@@ -20,14 +20,18 @@ import com.google.common.collect.Lists
 import spock.lang.Specification
 import spock.lang.Subject
 
+import javax.jcr.Node
 import javax.jcr.Value
 import javax.jcr.nodetype.NodeType
 
 @Subject(NodeImpl)
 class NodeImplSpec extends Specification {
+    SessionImpl session = new SessionImpl()
+
+
     def "A new node can be created"() {
         when:
-        def node = new NodeImpl(new SessionImpl(), "test")
+        def node = new NodeImpl(session, "test")
 
         then:
         node.isNode()
@@ -36,7 +40,7 @@ class NodeImplSpec extends Specification {
 
 
     def "Properties can be set on nodes"() {
-        def node = new NodeImpl(new SessionImpl(), "test")
+        def node = new NodeImpl(session, "test")
         node.getSession().save()
 
         when:
@@ -83,7 +87,7 @@ class NodeImplSpec extends Specification {
 
 
     def "Nodes have a set of properties"() {
-        def node = new NodeImpl(new SessionImpl(), "test")
+        def node = new NodeImpl(session, "test")
         node.setProperty("first", "a")
         node.setProperty("second", "b")
         node.setProperty("third", "c")
@@ -100,7 +104,7 @@ class NodeImplSpec extends Specification {
 
 
     def "Child nodes can be created"() {
-        def node = new NodeImpl(new SessionImpl(), "test")
+        def node = new NodeImpl(session, "test")
         node.getSession().save()
 
         when:
@@ -118,7 +122,7 @@ class NodeImplSpec extends Specification {
 
 
     def "Child nodes can be created with a specific node type"() {
-        def node = new NodeImpl(new RepositoryImpl().login(), "test")
+        def node = new NodeImpl(new RepositoryImpl().login() as SessionImpl, "test")
         node.getSession().save()
 
         when:
@@ -130,14 +134,14 @@ class NodeImplSpec extends Specification {
 
 
     def "A node can have multiple child nodes"() {
-        def node = new NodeImpl(new SessionImpl(), "test")
+        def node = new NodeImpl(session, "test")
         node.addNode("first")
         node.addNode("second")
         node.addNode("third")
         node.getSession().save()
 
         when:
-        def nodes = Lists.newArrayList(node.getNodes())
+        def nodes = Lists.<Node> newArrayList(node.getNodes())
 
         then:
         nodes.find { it.getName() == "first" }
@@ -149,7 +153,7 @@ class NodeImplSpec extends Specification {
 
     def "A node can be saved"() {
         when:
-        def node = new NodeImpl(new SessionImpl(), "test")
+        def node = new NodeImpl(session, "test")
         then:
         node.isNew()
         node.getSession().hasPendingChanges()
@@ -176,7 +180,7 @@ class NodeImplSpec extends Specification {
 
     def "Saving a node saves its children"() {
         when:
-        def node = new NodeImpl(new SessionImpl(), "test")
+        def node = new NodeImpl(session, "test")
         def child = node.addNode("child")
         then:
         node.isNew()
@@ -205,8 +209,6 @@ class NodeImplSpec extends Specification {
 
 
     def "Saving a node does not save any other node"() {
-        def session = new SessionImpl()
-
         when:
         def node1 = new NodeImpl(session, "node1")
         def node2 = new NodeImpl(session, "node2")
@@ -246,7 +248,6 @@ class NodeImplSpec extends Specification {
 
 
     def "remove() deletes the node from the session"() {
-        def session = new SessionImpl()
         def parent = new NodeImpl(session, "parent")
         def child = parent.addNode("child")
         session.nodeExists("parent/child")
@@ -260,11 +261,10 @@ class NodeImplSpec extends Specification {
 
 
     def "remove deletes descendent nodes from the session"() {
-        def session = new SessionImpl()
         def parent = new NodeImpl(session, "parent")
         def child = parent.addNode("child")
         def grandchild = child.addNode("grandchild")
-        def greatgrandchild = grandchild.addNode("greatgrandchild")
+        grandchild.addNode("greatgrandchild")
         session.nodeExists("parent/child")
         session.nodeExists("parent/child/grandchild")
         session.nodeExists("parent/child/grandchild/greatgrandchild")
@@ -280,7 +280,6 @@ class NodeImplSpec extends Specification {
 
 
     def "getParent for a standalone node returns the virtual root"() {
-        def session = new SessionImpl()
         def node = new NodeImpl(session, "node")
 
         when:
@@ -289,4 +288,33 @@ class NodeImplSpec extends Specification {
         then:
         parent == session.getRootNode()
     }
+
+
+    def "can add and remove mixins"() {
+        def nodeTypeManager = session.workspace.nodeTypeManager as NodeTypeManagerImpl
+        nodeTypeManager.registerNodeType(new NodeTypeImpl("fooble"))
+        nodeTypeManager.registerNodeType(new NodeTypeImpl("bobble"))
+
+        def node = new NodeImpl(session, "/node")
+
+        when:
+        node.addMixin("bobble")
+        node.addMixin("fooble")
+
+        then:
+        node.getMixinNodeTypes().collect { it.name } as Set == ["fooble", "bobble"] as Set
+
+        when:
+        node.removeMixin("bobble")
+
+        then:
+        node.getMixinNodeTypes().collect { it.name } as Set == ["fooble"] as Set
+
+        when:
+        node.removeMixin("bzzzt")
+
+        then:
+        node.getMixinNodeTypes().collect { it.name } as Set == ["fooble"] as Set
+    }
+
 }
