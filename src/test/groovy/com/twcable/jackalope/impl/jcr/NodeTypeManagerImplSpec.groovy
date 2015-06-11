@@ -19,32 +19,18 @@ package com.twcable.jackalope.impl.jcr
 import spock.lang.Specification
 import spock.lang.Subject
 
-@Subject(NodeTypeImpl)
-@SuppressWarnings("GroovyPointlessBoolean")
-class NodeTypeImplSpec extends Specification {
+class NodeTypeManagerImplSpec extends Specification {
 
-    def "NodeType has a name"() {
-        expect:
-        new NodeTypeImpl("name").getName() == "name"
-    }
+    @Subject
+    NodeTypeManagerImpl nodeTypeManager = new NodeTypeManagerImpl()
 
 
-    def "NodeType is tested by name"() {
-        expect:
-        new NodeTypeImpl("nodetype").isNodeType("nodetype")
-        !new NodeTypeImpl("nodetype").isNodeType("nodetypex")
-    }
-
-
-    def "NodeType can set isMixin"() {
-        given:
-        NodeTypeImpl nodeType = new NodeTypeImpl("aNodeType")
-
+    def "can register and get node types"() {
         when:
-        nodeType.setIsMixin(true)
+        nodeTypeManager.registerNodeType(new NodeTypeImpl("jcr:mixinTypes"))
 
         then:
-        nodeType.isMixin() == true
+        nodeTypeManager.hasNodeType("jcr:mixinTypes")
     }
 
 }

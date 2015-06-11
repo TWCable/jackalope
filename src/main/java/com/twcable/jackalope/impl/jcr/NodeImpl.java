@@ -18,6 +18,8 @@ package com.twcable.jackalope.impl.jcr;
 
 import com.twcable.jackalope.impl.common.Paths;
 import com.twcable.jackalope.impl.common.Values;
+import org.apache.jackrabbit.spi.Name;
+import org.apache.jackrabbit.spi.commons.name.NameFactoryImpl;
 
 import javax.annotation.Nonnull;
 import javax.jcr.AccessDeniedException;
@@ -45,6 +47,8 @@ import javax.jcr.nodetype.ConstraintViolationException;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeDefinition;
 import javax.jcr.nodetype.NodeType;
+import javax.jcr.nodetype.NodeTypeManager;
+import javax.jcr.nodetype.PropertyDefinition;
 import javax.jcr.version.ActivityViolationException;
 import javax.jcr.version.Version;
 import javax.jcr.version.VersionException;
@@ -52,10 +56,11 @@ import javax.jcr.version.VersionHistory;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
+
+import static java.util.Collections.singletonList;
 
 
 /**
@@ -336,43 +341,122 @@ public class NodeImpl extends ItemImpl implements Node {
 
     @Override
     public NodeType getPrimaryNodeType() throws RepositoryException {
-        return new NodeTypeImpl(getProperty("jcr:primaryType").getString());
+        return new NodeTypeImpl(primaryTypeProperty().getString());
     }
 
 
+    private PropertyImpl primaryTypeProperty() throws RepositoryException {
+        return getOrCreateProperty(getJcrNameForQName(Property.JCR_PRIMARY_TYPE));
+    }
+
+
+    private PropertyImpl mixinProperty() throws RepositoryException {
+        return getOrCreateProperty(getJcrNameForQName(Property.JCR_MIXIN_TYPES));
+    }
+
+
+    /**
+     * Returns the declared mixin node types of this node.
+     * <p/>
+     * The default implementation uses the values of the
+     * <code>jcr:mixinTypes</code> property to look up the mixin node types
+     * from the {@link NodeTypeManager} of the current workspace.
+     *
+     * @return mixin node types
+     * @throws RepositoryException if an error occurs
+     */
     @Override
     public NodeType[] getMixinNodeTypes() throws RepositoryException {
-        return new NodeType[0];
+        NodeTypeManager manager = getSession().getWorkspace().getNodeTypeManager();
+        Property property = mixinProperty();
+        Value[] values = property.getValues();
+        if (values == null) return new NodeType[0];
+        NodeType[] types = new NodeType[values.length];
+        for (int i = 0; i < values.length; i++) {
+            types[i] = manager.getNodeType(values[i].getString());
+        }
+        return types;
+    }
+
+
+    private String getJcrNameForQName(String name) throws RepositoryException {
+        return getJcrName(NameFactoryImpl.getInstance().create(name));
+    }
+
+
+    private String getJcrName(Name name) throws RepositoryException {
+        return session.getNamePathResolver().getJCRName(name);
     }
 
 
     @Override
     public boolean isNodeType(String nodeTypeName) throws RepositoryException {
-        return getProperty("jcr:primaryType").getString().equals(nodeTypeName);
+        return primaryTypeProperty().getString().equals(nodeTypeName);
     }
 
 
     @Override
     public void setPrimaryType(String nodeTypeName) throws NoSuchNodeTypeException, VersionException, ConstraintViolationException, LockException, RepositoryException {
-        setProperty("jcr:primaryType", nodeTypeName);
+        setProperty(getJcrNameForQName(Property.JCR_PRIMARY_TYPE), nodeTypeName);
     }
 
 
+    /**
+     * Very simple implementation of Mixin support: Does not check permissions, check for conflicts, etc.
+     */
     @Override
     public void addMixin(String mixinName) throws NoSuchNodeTypeException, VersionException, ConstraintViolationException, LockException, RepositoryException {
-        //Not Implemented
+        Property mixinProperty = mixinProperty();
+        Value[] values = mixinProperty.getValues();
+        final Value[] newValues;
+        if (values == null) {
+            newValues = new Value[1];
+            newValues[0] = new ValueImpl(mixinName);
+        }
+        else {
+            newValues = new Value[values.length + 1];
+            System.arraycopy(values, 0, newValues, 0, values.length);
+            newValues[values.length] = new ValueImpl(mixinName);
+        }
+        mixinProperty.setValue(newValues);
+        session.changeItem(this);
     }
 
 
     @Override
     public void removeMixin(String mixinName) throws NoSuchNodeTypeException, VersionException, ConstraintViolationException, LockException, RepositoryException {
-        //Not Implemented
+        Property mixinProperty = mixinProperty();
+        Value[] values = mixinProperty.getValues();
+        if (values == null) {
+            throw new NoSuchNodeTypeException(mixinName);
+        }
+
+        boolean found = false;
+        Value[] newValues = new Value[values.length - 1];
+        for (int idx = 0, newIdx = 0; idx < values.length; ) {
+            Value value = values[idx];
+            if (value.getString().equals(mixinName)) {
+                idx++;
+                found = true;
+            }
+            else {
+                if (newIdx < newValues.length)
+                    newValues[newIdx] = values[idx];
+                idx++;
+                newIdx++;
+            }
+        }
+
+        if (found) {
+            mixinProperty.setValue(newValues);
+            session.changeItem(this);
+        }
     }
 
 
     @Override
     public boolean canAddMixin(String mixinName) throws NoSuchNodeTypeException, RepositoryException {
-        return false;
+        return true;
     }
 
 
@@ -426,7 +510,7 @@ public class NodeImpl extends ItemImpl implements Node {
 
     @Override
     public NodeIterator getSharedSet() throws RepositoryException {
-        return new NodeIteratorImpl(Arrays.asList((Node)this));  //To change body of implemented methods use File | Settings | File Templates.
+        return new NodeIteratorImpl(singletonList((Node)this));
     }
 
 
@@ -541,4 +625,5 @@ public class NodeImpl extends ItemImpl implements Node {
     private PropertyImpl getOrCreateProperty(String name) throws RepositoryException {
         return hasProperty(name) ? (PropertyImpl)getProperty(name) : new PropertyImpl(session, Paths.resolve(getPath(), name));
     }
+
 }

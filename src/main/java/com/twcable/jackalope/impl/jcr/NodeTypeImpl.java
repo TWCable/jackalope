@@ -25,8 +25,10 @@ import javax.jcr.nodetype.PropertyDefinition;
 /**
  * Simple implementation of an {@link NodeType}
  */
+@SuppressWarnings("unused")
 public class NodeTypeImpl implements NodeType {
     private final String nodeTypeName;
+    private boolean isMixin;
 
 
     public NodeTypeImpl(String nodeTypeName) {
@@ -60,7 +62,7 @@ public class NodeTypeImpl implements NodeType {
 
     @Override
     public boolean isNodeType(String nodeTypeName) {
-        return this.nodeTypeName.equals(nodeTypeName);  //To change body of implemented methods use File | Settings | File Templates.
+        return this.nodeTypeName.equals(nodeTypeName);
     }
 
 
@@ -136,9 +138,14 @@ public class NodeTypeImpl implements NodeType {
     }
 
 
+    public void setIsMixin(boolean isMixin) {
+        this.isMixin = isMixin;
+    }
+
+
     @Override
     public boolean isMixin() {
-        return false;
+        return this.isMixin;
     }
 
 
