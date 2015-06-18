@@ -217,6 +217,18 @@ public class PageImpl implements Page {
 
 
     @Override
+    public Calendar getDeleted() {
+        throw new UnsupportedOperationException();
+    }
+
+
+    @Override
+    public String getDeletedBy() {
+        throw new UnsupportedOperationException();
+    }
+
+
+    @Override
     public String getLastModifiedBy() {
         ValueMap properties = getProperties();
         String lastModifiedBy = properties.get("cq:lastModifiedBy", String.class);
