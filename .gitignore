@@ -5,3 +5,4 @@ build/
 *.iws
 out/
 atlassian-ide-plugin.xml
+*.jar

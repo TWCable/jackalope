@@ -19,6 +19,9 @@ package com.twcable.jackalope.impl.sling;
 import com.day.cq.wcm.api.PageManager;
 import com.twcable.jackalope.impl.common.Paths;
 import com.twcable.jackalope.impl.cq.PageManagerImpl;
+import com.twcable.jackalope.impl.jcr.NodeImpl;
+import com.twcable.jackalope.impl.jcr.SessionImpl;
+import com.twcable.jackalope.impl.jcr.ValueImpl;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.PersistenceException;
@@ -29,12 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.jcr.Item;
+import javax.jcr.ItemExistsException;
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -125,7 +132,7 @@ public class ResourceResolverImpl implements ResourceResolver {
 
     @Override
     public Iterable<Resource> getChildren(Resource resource) {
-        return null;
+        return resource.getChildren();
     }
 
 
@@ -185,12 +192,68 @@ public class ResourceResolverImpl implements ResourceResolver {
 
     @Override
     public void delete(Resource resource) throws PersistenceException {
+        try {
+            session.removeItem(resource.getPath());
+        }
+        catch (RepositoryException e) {
+            throw new PersistenceException("Could not delete " + resource.getPath(), e);
+        }
     }
 
 
     @Override
-    public Resource create(Resource resource, String s, Map<String, Object> stringObjectMap) throws PersistenceException {
-        return null;
+    public Resource create(@Nonnull Resource parent, @Nonnull String name, @Nullable Map<String, Object> properties) throws PersistenceException {
+        //noinspection ConstantConditions
+        if (parent == null)
+            throw new IllegalArgumentException("Could not create a node for \"" + name + "\" because the parent is null");
+        String parentPath = parent.getPath();
+
+        // remove any trailing slash (or sole-slash if the root)
+        if (parentPath.endsWith("/")) parentPath = parentPath.substring(0, parentPath.length() - 1);
+        String path = parentPath + "/" + name;
+
+        return createNodeResource(path, properties != null ? properties : Collections.<String, Object>emptyMap());
+    }
+
+
+    private Resource createNodeResource(@Nonnull String path, @Nonnull Map<String, Object> properties) {
+        try {
+            if (session.nodeExists(path)) return new NodeResourceImpl(this, session.getNode(path));
+        }
+        catch (RepositoryException e) {
+            //should be impossible since this is in-memory
+            throw new IllegalStateException(e);
+        }
+
+        try {
+            NodeImpl node = createNode(path, properties);
+            return new NodeResourceImpl(this, node);
+        }
+        catch (ItemNotFoundException | ItemExistsException e) {
+            // should be impossible since we're checking first
+            throw new IllegalStateException(e);
+        }
+    }
+
+
+    private NodeImpl createNode(@Nonnull String path, @Nonnull Map<String, Object> properties) throws ItemNotFoundException, ItemExistsException {
+        NodeImpl node = new NodeImpl((SessionImpl)session, path);
+
+        for (String propName : properties.keySet()) {
+            Object mapVal = properties.get(propName);
+            setNodeProperty(node, propName, mapVal);
+        }
+        return node;
+    }
+
+
+    private static void setNodeProperty(@Nonnull NodeImpl node, @Nonnull String propName, @Nonnull Object propertyVal) {
+        try {
+            node.setProperty(propName, new ValueImpl(propertyVal));
+        }
+        catch (RepositoryException ignore) {
+            // ignore
+        }
     }
 
 
@@ -212,7 +275,7 @@ public class ResourceResolverImpl implements ResourceResolver {
 
     @Override
     public String getParentResourceType(Resource resource) {
-        return null;
+        return resource.getParent().getResourceType();
     }
 
 
@@ -223,8 +286,8 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    public boolean isResourceType(Resource resource, String s) {
-        return false;
+    public boolean isResourceType(Resource resource, String resourceType) {
+        return resource.isResourceType(resourceType);
     }
 
 

@@ -36,10 +36,17 @@ import static org.apache.sling.jcr.resource.JcrResourceConstants.SLING_RESOURCE_
 
 @Subject(NodeResourceImpl)
 class NodeResourceImplSpec extends Specification {
+    SlingRepositoryImpl repository
+    SessionImpl session
+
+
+    def setup() {
+        repository = new SlingRepositoryImpl()
+        session = repository.login() as SessionImpl
+    }
+
 
     def "Create a Node resource from a simple node"() {
-        def repository = new SlingRepositoryImpl()
-        def session = repository.login() as SessionImpl
         def node = new NodeImpl(session, "/test")
         node.setProperty(SLING_RESOURCE_TYPE_PROPERTY, "app/test/components/test")
         def resourceResolver = new ResourceResolverImpl(repository)
@@ -48,18 +55,16 @@ class NodeResourceImplSpec extends Specification {
         def resource = new NodeResourceImpl(resourceResolver, node)
 
         then:
-        resource.getName() == "test"
-        resource.getPath() == "/test"
-        resource.getParent().getPath() == "/"
-        resource.getResourceResolver() == resourceResolver
-        resource.getResourceType() == "app/test/components/test"
+        resource.name == "test"
+        resource.path == "/test"
+        resource.parent.path == "/"
+        resource.resourceResolver == resourceResolver
+        resource.resourceType == "app/test/components/test"
         resource.isResourceType("app/test/components/test")
     }
 
 
     def "Create child resources"() {
-        def repository = new SlingRepositoryImpl()
-        def session = repository.login() as SessionImpl
         def node = new NodeImpl(session, "/test")
         node.addNode("child1")
         node.addNode("child2")
@@ -69,38 +74,38 @@ class NodeResourceImplSpec extends Specification {
         def resource = new NodeResourceImpl(resourceResolver, node)
 
         then:
-        resource.getChild("child1").getName() == "child1"
-        resource.getChild("child1").getPath() == "/test/child1"
-        resource.getChild("child1").getParent().getName() == "test"
-        resource.getChild("child2").getName() == "child2"
-        resource.getChild("child2").getPath() == "/test/child2"
-        resource.getChild("child2").getParent().getName() == "test"
+        resource.getChild("child1").name == "child1"
+        resource.getChild("child1").path == "/test/child1"
+        resource.getChild("child1").parent.name == "test"
+        resource.getChild("child2").name == "child2"
+        resource.getChild("child2").path == "/test/child2"
+        resource.getChild("child2").parent.name == "test"
 
         when:
         def actual = Lists.newArrayList(resource.listChildren())
 
         then:
-        actual.find { it.getName() == "child1" }
-        actual.find { it.getName() == "child2" }
+        actual.find { it.name == "child1" }
+        actual.find { it.name == "child2" }
     }
 
 
     def "NodeResource can be adapted to Node"() {
-        def resource = new NodeResourceImpl(new ResourceResolverImpl(new SlingRepositoryImpl()), new NodeImpl(new SessionImpl(), "/test"))
-        def node = resource.adaptTo(Node.class)
+        def resource = new NodeResourceImpl(new ResourceResolverImpl(repository), new NodeImpl(session, "/test"))
+        def node = resource.adaptTo(Node)
 
         expect:
-        node.getName() == "test"
-        node.getPath() == "/test"
+        node.name == "test"
+        node.path == "/test"
     }
 
 
     def "NodeResource can be adapted to a ValueMap"() {
-        def node = new NodeImpl(new SessionImpl(), "/test")
+        def node = new NodeImpl(session, "/test")
         node.setProperty("string", "hello")
         node.setProperty("long", Long.valueOf(1000l))
-        def resource = new NodeResourceImpl(new ResourceResolverImpl(new SlingRepositoryImpl()), node)
-        def map = resource.adaptTo(ValueMap.class)
+        def resource = new NodeResourceImpl(new ResourceResolverImpl(repository), node)
+        def map = resource.adaptTo(ValueMap)
 
         expect:
         map.get("string") == "hello"

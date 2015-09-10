@@ -18,71 +18,112 @@ package com.twcable.jackalope.impl.sling
 
 import com.twcable.jackalope.impl.jcr.NodeImpl
 import com.twcable.jackalope.impl.jcr.SessionImpl
+import org.apache.sling.api.resource.ValueMap
 import spock.lang.Specification
 import spock.lang.Subject
 
-@Subject(ResourceResolverImpl)
 class ResourceResolverImplSpec extends Specification {
 
-    @SuppressWarnings("GroovyUnusedAssignment")
+    SlingRepositoryImpl repository
+    SessionImpl session
+
+    @Subject
+    ResourceResolverImpl resourceResolver
+
+
+    def setup() {
+        repository = new SlingRepositoryImpl()
+        session = repository.login() as SessionImpl
+        resourceResolver = new ResourceResolverImpl(repository)
+    }
+
+
     def "Resolves node resources"() {
-        def repository = new SlingRepositoryImpl()
-        def session = repository.login() as SessionImpl
+        //noinspection GroovyUnusedAssignment
         def node = new NodeImpl(session, "/test")
-        def resourceResolver = new ResourceResolverImpl(repository)
 
         when:
-        def resource = resourceResolver.resolve("/test")
+        def resolved = resourceResolver.resolve("/test")
+
+        then:
+        resolved.name == "test"
+        resolved.path == "/test"
+        resolved instanceof NodeResourceImpl
+
+        when:
+        def resource = resourceResolver.getResource("/test")
 
         then:
         resource.name == "test"
         resource.path == "/test"
-        resource instanceof NodeResourceImpl
 
         when:
-        resource = resourceResolver.getResource("/test")
+        def resourceChild = resourceResolver.getResource(resourceResolver.getResource("/"), "test")
 
         then:
-        resource.name == "test"
-        resource.path == "/test"
-
-        when:
-        resource = resourceResolver.getResource(resourceResolver.getResource("/"), "test")
-
-        then:
-        resource.name == "test"
-        resource.path == "/test"
+        resourceChild.name == "test"
+        resourceChild.path == "/test"
     }
 
 
     def "Resolves property resources"() {
-        def repository = new SlingRepositoryImpl()
-        def session = repository.login() as SessionImpl
         def node = new NodeImpl(session, "/test")
         node.setProperty("prop", "hello, world")
-        def resourceResolver = new ResourceResolverImpl(repository)
 
         when:
-        def resource = resourceResolver.resolve("/test/prop")
+        def resolved = resourceResolver.resolve("/test/prop")
+
+        then:
+        resolved.name == "prop"
+        resolved.path == "/test/prop"
+        resolved instanceof PropertyResourceImpl
+
+        when:
+        def resource = resourceResolver.getResource("/test/prop")
 
         then:
         resource.name == "prop"
         resource.path == "/test/prop"
-        resource instanceof PropertyResourceImpl
 
         when:
-        resource = resourceResolver.getResource("/test/prop")
+        def resourceProp = resourceResolver.getResource(resourceResolver.getResource("/test"), "prop")
 
         then:
-        resource.name == "prop"
-        resource.path == "/test/prop"
+        resourceProp.name == "prop"
+        resourceProp.path == "/test/prop"
+    }
+
+
+    def "Creates node resources"() {
+        //noinspection GroovyUnusedAssignment
+        def parentNode = new NodeImpl(session, "/test")
+        def parent = resourceResolver.getResource("/test")
 
         when:
-        resource = resourceResolver.getResource(resourceResolver.getResource("/test"), "prop")
+        def created = resourceResolver.create(parent, "child", [prop1: "val1", prop2: "val2"])
 
         then:
-        resource.name == "prop"
-        resource.path == "/test/prop"
+        created.name == "child"
+        created.path == "/test/child"
+        created.adaptTo(ValueMap).keySet() == ["prop1", "prop2"] as Set
+    }
+
+
+    def "Deletes node resources"() {
+        def path = "/test"
+
+        //noinspection GroovyUnusedAssignment
+        def parentNode = new NodeImpl(session, path)
+        def resource = resourceResolver.getResource(path)
+
+        expect:
+        resourceResolver.getResource(path) != null
+
+        when:
+        resourceResolver.delete(resource)
+
+        then:
+        resourceResolver.getResource(path) == null
     }
 
 }
