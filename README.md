@@ -153,7 +153,7 @@ repositories {
   }
 }
 
-testCompile 'com.twcable.jackalope:jackalope:3.0.0'
+testCompile 'com.twcable.jackalope:jackalope:3.0.1'
 ```
 
 # Releasing
