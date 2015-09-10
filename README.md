@@ -156,6 +156,10 @@ repositories {
 testCompile 'com.twcable.jackalope:jackalope:3.0.0'
 ```
 
+# Releasing
+
+For the developers of Jackalope, please read [the documentation for creating and releasing a new version](docs/RELEASING.adoc).
+
 # LICENSE
 
 Copyright 2015 Time Warner Cable, Inc.

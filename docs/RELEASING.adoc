@@ -1,0 +1,41 @@
+= Releasing A New Version
+
+== Update Files
+
+. Update the `version` property in link:../gradle.properties[`gradle.properties`]. We follow http://semver.org/spec/v2.0.0.html[Semantic Versioning 2.0.0], so increment accordingly
+
+. Update link:../README.md[README.md] with the new version in the "`Including In Your Build`" section
+
+. Update link:../RELEASE_NOTES.md[RELEASE_NOTES.md] with what has changed. Assuming the commit messages have been written well, it will generally be the subject lines of the commits since the last release, but edit (including adding) as appropriate for a human to easily understand what has changed
+
+== Create A Clean Build
+
+[source,bash]
+--
+$ ./gradlew clean build
+--
+
+== Commit and Push
+
+[source,bash]
+--
+$ git add gradle.properties README.md RELEASE_NOTES.md
+$ git commit -m v9.9.9   # "v" followed by the version number
+$ git tag v9.9.9
+$ git push origin HEAD:master
+$ git push origin v9.9.9
+--
+
+Create a https://github.com/TWCable/jackalope/releases/new[new GitHub release], selecting the just-uploaded tag from the list. There's no need for a "`Release title`", though copy & paste the latest version information from RELEASE_NOTES.md into the "`Describe this release`" box. If you want you can attach the built artifact to the GitHub release, but the "`official`" location is https://bintray.com/twcable/aem/jackalope/_latestVersion[BinTray].
+
+*NOTE*: If you are back-porting a release or the like, GitHub's "`release`" feature is extremely simplistic and always labels most recently create "release" record as being the "`Latest release`".
+
+
+== Upload to BinTray
+
+[source,bash]
+--
+$ ./gradlew bintrayUpload
+--
+
+If you have not yet set up your credentials, the task will tell you what to do.
