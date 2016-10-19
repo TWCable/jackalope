@@ -1,20 +1,66 @@
 buildscript {
     repositories {
         jcenter()
+        maven { name = 'Defaults Plugin Repo'; url = 'http://dl.bintray.com/jmoore/java-lib' }
+        maven { name = 'Gradle Plugin Portal'; url = 'https://plugins.gradle.org/m2/' }
+        mavenLocal()
     }
+
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.1'
+        classpath 'com.mooregreatsoftware:gradle-defaults:3.0.0'
     }
 }
 
 plugins {
     id 'groovy'
+    id 'com.jfrog.bintray' version '1.7.1'
 }
 
-version = new Version(version as String)
+apply plugin: 'com.mooregreatsoftware.defaults'
 
-apply from: "gradle/ide.gradle"
-apply from: "gradle/bintray.gradle"
+defaults {
+    // make sure configuration is done for enforcing licenses, BinTray, etc.
+    openSource = true
+
+    compatibilityVersion = 1.8
+
+    id = 'twcable'
+
+    orgName = 'Time Warner Cable'
+    orgUrl = 'http://www.timewarnercable.com'
+
+    developers = [
+        [id: 'jmoore', name: 'Jim Moore', email: 'moore.jim@gmail.com']
+    ]
+
+    copyrightYears = '2014-2016'
+
+    vcsWriteUrl = "git@github.com:jdigger/gradle-defaults.git"
+
+    lombok.enabled = true
+    checkerFramework.enabled = true
+}
+
+bintray {
+    configurations = ['archives']
+
+    pkg {
+        userOrg = 'twcable'
+        repo = 'aem'
+        name = project.name
+
+        desc = project.description
+
+        websiteUrl = 'https://github.com/TWCable/jackalope'
+        issueTrackerUrl = 'https://github.com/TWCable/jackalope/issues'
+        vcsUrl = 'https://github.com/TWCable/jackalope.git'
+        licenses = ['Apache-2.0']
+        labels = ['groovy', 'cq', 'aem', 'jcr', 'sling']
+        attributes = ['plat': ['aem', 'cq', 'jcr', 'sling']]
+
+        publicDownloadNumbers = true
+    }
+}
 
 repositories {
     jcenter()
@@ -24,9 +70,6 @@ repositories {
         url "http://repo.adobe.com/nexus/content/groups/public"
     }
 }
-
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
 
 
 dependencies {
@@ -52,52 +95,6 @@ dependencies {
     testCompile "org.codehaus.groovy:groovy:2.3.6"
     testCompile "org.spockframework:spock-core:0.7-groovy-2.0", {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
-    }
-}
-
-// **************************************************************************
-//
-// VERSION CLASS
-//
-// **************************************************************************
-
-class Version {
-    String originalVersion
-    String thisVersion
-    String status
-    Date buildTime
-
-
-    Version(String versionValue) {
-        buildTime = new Date()
-        originalVersion = versionValue
-        if (originalVersion.endsWith('-SNAPSHOT')) {
-            status = 'integration'
-            thisVersion = originalVersion - 'SNAPSHOT' + getTimestamp()
-        }
-        else {
-            status = 'release'
-            thisVersion = versionValue
-        }
-    }
-
-
-    @SuppressWarnings("UnnecessaryQualifiedReference")
-    String getTimestamp() {
-        // Convert local file timestamp to UTC
-        def format = new java.text.SimpleDateFormat('yyyyMMddHHmmss')
-        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('UTC')));
-        return format.format(buildTime)
-    }
-
-
-    String toString() {
-        originalVersion
-    }
-
-
-    String getBintrayVersion() {
-        thisVersion
     }
 }
 
