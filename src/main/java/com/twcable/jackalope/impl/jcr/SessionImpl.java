@@ -47,9 +47,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.AccessControlException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,11 +60,11 @@ import java.util.Set;
 @SuppressWarnings("DuplicateThrows")
 public class SessionImpl implements Session {
     private final Repository repository;
-    private final Map<String, ItemImpl> itemStore = new HashMap<>();
+    private final Map<String, ItemImpl> itemStore = new LinkedHashMap<>();
     private boolean isLive = true;
 
-    private Set<String> addedItems = new HashSet<>();
-    private Set<String> changedItems = new HashSet<>();
+    private Set<String> addedItems = new LinkedHashSet<>();
+    private Set<String> changedItems = new LinkedHashSet<>();
 
     private Workspace workspace = null;
 
