@@ -1,0 +1,15 @@
+package org.apache.sling.api.resource;
+
+import java.util.Collections;
+import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+public interface ValueMap {
+    <T> @Nullable T get(@NonNull String var1, @NonNull Class<T> var2);
+
+    <T> @Nullable T get(@NonNull String var1, @Nullable T var2);
+}

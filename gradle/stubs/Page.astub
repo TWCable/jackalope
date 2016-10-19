@@ -1,0 +1,90 @@
+package com.day.cq.wcm.api;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import com.day.cq.commons.Filter;
+import com.day.cq.tagging.Tag;
+import com.day.cq.wcm.api.PageManager;
+import com.day.cq.wcm.api.Template;
+import com.day.cq.wcm.api.WCMException;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.Locale;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+
+public interface Page {
+    @NonNull String getPath();
+
+    @NonNull PageManager getPageManager();
+
+    @Nullable Resource getContentResource();
+
+    @Nullable Resource getContentResource(String var1);
+
+    @NonNull Iterator<Page> listChildren();
+
+    @NonNull Iterator<Page> listChildren(@NonNull Filter<Page> var1);
+
+    @NonNull Iterator<Page> listChildren(@NonNull Filter<Page> var1, boolean var2);
+
+    boolean hasChild(String var1);
+
+    int getDepth();
+
+    @Nullable Page getParent();
+
+    @Nullable Page getParent(int var1);
+
+    @Nullable Page getAbsoluteParent(int var1);
+
+    @NonNull ValueMap getProperties();
+
+    @Nullable ValueMap getProperties(String var1);
+
+    @NonNull String getName();
+
+    @Nullable String getTitle();
+
+    @Nullable String getPageTitle();
+
+    @Nullable String getNavigationTitle();
+
+    boolean isHideInNav();
+
+    boolean hasContent();
+
+    boolean isValid();
+
+    long timeUntilValid();
+
+    @Nullable Calendar getOnTime();
+
+    @Nullable Calendar getOffTime();
+
+    @Nullable Calendar getDeleted();
+
+    @Nullable String getDeletedBy();
+
+    @Nullable String getLastModifiedBy();
+
+    @Nullable Calendar getLastModified();
+
+    @Nullable String getVanityUrl();
+
+    @NonNull Tag[] getTags();
+
+    void lock() throws WCMException;
+
+    boolean isLocked();
+
+    @Nullable String getLockOwner();
+
+    boolean canUnlock();
+
+    void unlock() throws WCMException;
+
+    @Nullable Template getTemplate();
+
+    @NonNull Locale getLanguage(boolean var1);
+}

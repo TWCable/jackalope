@@ -24,7 +24,7 @@ defaults {
 
     compatibilityVersion = 1.8
 
-    id = 'twcable'
+    orgId = 'twcable'
 
     orgName = 'Time Warner Cable'
     orgUrl = 'http://www.timewarnercable.com'
@@ -97,6 +97,15 @@ dependencies {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
     }
 }
+
+import com.mooregreatsoftware.gradle.defaults.config.JavaConfig
+
+import java.util.concurrent.TimeUnit
+
+def javaConfig = JavaConfig.of(project).get(1, TimeUnit.SECONDS)
+javaConfig.registerAnnotationProcessorOptions(
+    [new JavaConfig.Option("stubs", "${project.projectDir}/gradle/stubs")])
+
 
 wrapper {
     gradleVersion = '2.14.1'
