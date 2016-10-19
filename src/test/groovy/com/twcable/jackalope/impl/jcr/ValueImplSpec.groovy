@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Time Warner Cable, Inc.
+ * Copyright 2014-2016 Time Warner Cable, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.twcable.jackalope.impl.jcr
 
 import org.apache.commons.io.IOUtils
