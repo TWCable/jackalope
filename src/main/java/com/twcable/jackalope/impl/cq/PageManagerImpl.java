@@ -31,6 +31,8 @@ import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -41,6 +43,7 @@ import java.util.Collection;
 /**
  * Page Manager implementation.
  */
+@SuppressWarnings("RedundantCast")
 public class PageManagerImpl implements PageManager {
     private final ResourceResolver resolver;
     private final Session session;
@@ -55,14 +58,15 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public Page getPage(String path) {
+    public @Nullable Page getPage(@Nullable String path) {
+        if (path == null) return null;
         Resource resource = resolver.getResource(path);
         return resource != null ? resource.adaptTo(Page.class) : null;
     }
 
 
     @Override
-    public Page getContainingPage(Resource resource) {
+    public @Nullable Page getContainingPage(@Nullable Resource resource) {
         if (resource == null) return null;
 
         String path = resource.getPath();
@@ -77,19 +81,20 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public Page getContainingPage(String path) {
+    public @Nullable Page getContainingPage(@Nullable String path) {
+        if (path == null) return null;
         return getContainingPage(resolver.getResource(path));
     }
 
 
     @Override
-    public Page create(String parentPath, String pageName, String template, String title) throws WCMException {
+    public Page create(String parentPath, @Nullable String pageName, @Nullable String template, @Nullable String title) throws WCMException {
         return create(parentPath, pageName, template, title, true);
     }
 
 
     @Override
-    public Page create(String parentPath, String pageName, String template, String title,
+    public Page create(String parentPath, @Nullable String pageName, @Nullable String template, @Nullable String title,
                        boolean autoSave) throws WCMException {
         if (parentPath == null) throw new IllegalArgumentException("Parent path can't be null.");
         if (pageName == null && title == null)
@@ -101,7 +106,7 @@ public class PageManagerImpl implements PageManager {
             Node parent = JcrUtils.getOrCreateByPath(parentPath, JcrConstants.NT_UNSTRUCTURED, session);
 
             if (pageName == null || pageName.isEmpty())
-                pageName = JcrUtil.createValidName(title, JcrUtil.HYPHEN_LABEL_CHAR_MAPPING);
+                pageName = JcrUtil.createValidName((@NonNull String)title, JcrUtil.HYPHEN_LABEL_CHAR_MAPPING);
             if (!JcrUtil.isValidName(pageName)) throw new IllegalArgumentException("Illegal page name: " + pageName);
 
             Node pageNode = parent.addNode(pageName, JcrConstants.CQ_PAGE);
@@ -112,7 +117,7 @@ public class PageManagerImpl implements PageManager {
                 session.save();
             }
 
-            return getPage(pageNode.getPath());
+            return (@NonNull Page)getPage(pageNode.getPath());
         }
         catch (RepositoryException e) {
             throw new WCMException("Unable to create page", e);
@@ -121,26 +126,27 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public Page move(Page page, String destination, String beforeName, boolean shallow, boolean resolveConflicts,
+    public Page move(Page page, String destination, @Nullable String beforeName, boolean shallow, boolean resolveConflicts,
                      String[] adjustRefs) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public Resource move(Resource resource, String destination, String beforeName, boolean shallow, boolean resolveConflicts, String[] adjustRefs) throws WCMException {
+    public Resource move(Resource resource, String destination, @Nullable String beforeName, boolean shallow, boolean resolveConflicts, String[] adjustRefs) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public Page copy(Page page, String destination, String beforeName, boolean shallow, boolean resolveConflict) throws WCMException {
+    public Page copy(Page page, String destination, @Nullable String beforeName, boolean shallow, boolean resolveConflict) throws WCMException {
         return copy(page, destination, beforeName, shallow, resolveConflict, false);
     }
 
 
     @Override
-    public Page copy(Page page, String destination, String beforeName, boolean shallow, boolean resolveConflict, boolean autoSave) throws WCMException {
+    @SuppressWarnings("ConstantConditions")
+    public Page copy(Page page, String destination, @Nullable String beforeName, boolean shallow, boolean resolveConflict, boolean autoSave) throws WCMException {
         if (beforeName != null && !beforeName.isEmpty())
             throw new UnsupportedOperationException("Ordering not supported.");
         if (resolveConflict) throw new UnsupportedOperationException("Conflict resolution not supported.");
@@ -158,18 +164,23 @@ public class PageManagerImpl implements PageManager {
                 for (String key : properties.keySet()) contentNode.setProperty(key, new ValueImpl(properties.get(key)));
             else throw new WCMException("Unable to copy properties");
 
-            for (Resource child : Lists.newArrayList(page.getContentResource().listChildren())) {
-                copy(child, contentResource.getPath() + "/" + child.getName(), null, false, false, false);
+            final Resource pageContentResource = page.getContentResource();
+            if (pageContentResource != null) {
+                for (Resource child : Lists.newArrayList(pageContentResource.listChildren())) {
+                    copy(child, contentResource.getPath() + "/" + child.getName(), null, false, false, false);
+                }
             }
 
             if (autoSave) session.save();
             return newPage;
         }
         catch (RepositoryException e) {
-            delete(newPage, false);
+            if (newPage != null)
+                delete(newPage, false);
             throw new WCMException("Unable to copy properties.", e);
         }
         catch (WCMException e) {
+            if (newPage != null)
             delete(newPage, false);
             throw e;
         }
@@ -183,7 +194,7 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public Resource copy(Resource resource, String destination, String beforeName, boolean shallow, boolean resolveConflict, boolean autoSave) throws WCMException {
+    public Resource copy(Resource resource, String destination, @Nullable String beforeName, boolean shallow, boolean resolveConflict, boolean autoSave) throws WCMException {
         if (beforeName != null && !beforeName.isEmpty())
             throw new UnsupportedOperationException("Ordering not supported.");
         if (resolveConflict) throw new UnsupportedOperationException("Conflict resolution not supported.");
@@ -200,7 +211,8 @@ public class PageManagerImpl implements PageManager {
             Node newNode = parent.addNode(name, node.getPrimaryNodeType().toString());
 
             ValueMap properties = resource.adaptTo(ValueMap.class);
-            for (String key : properties.keySet()) newNode.setProperty(key, new ValueImpl(properties.get(key)));
+            if (properties != null)
+                for (String key : properties.keySet()) newNode.setProperty(key, new ValueImpl(properties.get(key)));
 
             if (!shallow && node.hasNodes())
                 for (Resource child : Lists.newArrayList(resource.listChildren()))
@@ -243,8 +255,16 @@ public class PageManagerImpl implements PageManager {
     public void delete(Page page, boolean shallow, boolean autoSave) throws WCMException {
         if (page == null) return;
 
-        if (!shallow) delete(page.adaptTo(Resource.class), false, autoSave);
-        else delete(page.getContentResource(), true, autoSave);
+        if (!shallow) {
+            final Resource resource = page.adaptTo(Resource.class);
+            if (resource != null)
+                delete(resource, false, autoSave);
+        }
+        else {
+            final Resource resource = page.getContentResource();
+            if (resource != null)
+                delete(resource, true, autoSave);
+        }
     }
 
 
@@ -274,13 +294,13 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public void order(Page page, String beforeName) throws WCMException {
+    public void order(Page page, @Nullable String beforeName) throws WCMException {
         order(page, beforeName, true);
     }
 
 
     @Override
-    public void order(Page page, String beforeName, boolean autoSave) throws WCMException {
+    public void order(@Nullable Page page, @Nullable String beforeName, boolean autoSave) throws WCMException {
         if (page == null) return;
 
         order(page.getContentResource(), beforeName, autoSave);
@@ -288,13 +308,13 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public void order(Resource resource, String beforeName) throws WCMException {
+    public void order(@Nullable Resource resource, @Nullable String beforeName) throws WCMException {
         order(resource, beforeName, true);
     }
 
 
     @Override
-    public void order(Resource resource, String beforeName, boolean autoSave) throws WCMException {
+    public void order(@Nullable Resource resource, @Nullable String beforeName, boolean autoSave) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
@@ -306,14 +326,14 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public Collection<Template> getTemplates(String s) {
+    public Collection<Template> getTemplates(@Nullable String s) {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
     @SuppressWarnings("deprecation")
-    public Collection<Blueprint> getBlueprints(String s) {
+    public Collection<Blueprint> getBlueprints(@Nullable String s) {
         throw new UnsupportedOperationException();
     }
 
@@ -331,31 +351,31 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public Collection<Revision> getRevisions(String s, Calendar calendar) throws WCMException {
+    public Collection<Revision> getRevisions(String s, @Nullable Calendar calendar) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public Collection<Revision> getRevisions(String s, Calendar calendar, boolean b) throws WCMException {
+    public Collection<Revision> getRevisions(String s, @Nullable Calendar calendar, boolean b) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public Collection<Revision> getChildRevisions(String s, Calendar calendar) throws WCMException {
+    public Collection<Revision> getChildRevisions(String s, @Nullable Calendar calendar) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public Collection<Revision> getChildRevisions(String s, Calendar calendar, boolean b) throws WCMException {
+    public Collection<Revision> getChildRevisions(String s, @Nullable Calendar calendar, boolean b) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public Collection<Revision> getChildRevisions(String s, String s1, Calendar calendar) throws WCMException {
+    public Collection<Revision> getChildRevisions(String s, String s1, @Nullable Calendar calendar) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
@@ -379,7 +399,7 @@ public class PageManagerImpl implements PageManager {
 
 
     @Override
-    public void touch(Node node, boolean b, Calendar calendar, boolean b1) throws WCMException {
+    public void touch(Node node, boolean b, @Nullable Calendar calendar, boolean b1) throws WCMException {
         throw new UnsupportedOperationException();
     }
 }

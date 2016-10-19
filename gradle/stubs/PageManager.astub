@@ -1,0 +1,83 @@
+package com.day.cq.wcm.api;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.Revision;
+import com.day.cq.wcm.api.Template;
+import com.day.cq.wcm.api.WCMException;
+import com.day.cq.wcm.api.msm.Blueprint;
+import org.apache.sling.api.resource.Resource;
+
+import javax.jcr.Node;
+import java.util.Calendar;
+import java.util.Collection;
+
+public interface PageManager {
+    @Nullable Page getPage(@Nullable String var1);
+
+    @Nullable Page getContainingPage(@Nullable Resource var1);
+
+    @Nullable Page getContainingPage(@Nullable String var1);
+
+    Page create(String var1, @Nullable String var2, @Nullable String var3, @Nullable String var4) throws WCMException;
+
+    Page create(String var1, @Nullable String var2, @Nullable String var3, @Nullable String var4, boolean var5) throws WCMException;
+
+    Page move(Page var1, String var2, String var3, boolean var4, boolean var5, String[] var6) throws WCMException;
+
+    Resource move(Resource var1, String var2, String var3, boolean var4, boolean var5, String[] var6) throws WCMException;
+
+    Page copy(Page var1, String var2, String var3, boolean var4, boolean var5) throws WCMException;
+
+    Page copy(Page var1, String var2, String var3, boolean var4, boolean var5, boolean var6) throws WCMException;
+
+    Resource copy(Resource var1, String var2, String var3, boolean var4, boolean var5) throws WCMException;
+
+    Resource copy(Resource var1, String var2, String var3, boolean var4, boolean var5, boolean var6) throws WCMException;
+
+    void delete(Page var1, boolean var2) throws WCMException;
+
+    void delete(Page var1, boolean var2, boolean var3) throws WCMException;
+
+    void delete(Resource var1, boolean var2) throws WCMException;
+
+    void delete(Resource var1, boolean var2, boolean var3) throws WCMException;
+
+    void order(Page var1, @Nullable String var2) throws WCMException;
+
+    void order(Page var1, @Nullable String var2, boolean var3) throws WCMException;
+
+    void order(Resource var1, @Nullable String var2) throws WCMException;
+
+    void order(Resource var1, @Nullable String var2, boolean var3) throws WCMException;
+
+    @Nullable Template getTemplate(String var1);
+
+    Collection<Template> getTemplates(@Nullable String var1);
+
+    @Deprecated
+    Collection<Blueprint> getBlueprints(@Nullable String var1);
+
+    @Nullable Revision createRevision(Page var1) throws WCMException;
+
+    @Nullable Revision createRevision(Page var1, String var2, String var3) throws WCMException;
+
+    Collection<Revision> getRevisions(String var1, @Nullable Calendar var2) throws WCMException;
+
+    Collection<Revision> getRevisions(String var1, @Nullable Calendar var2, boolean var3) throws WCMException;
+
+    Collection<Revision> getChildRevisions(String var1, @Nullable Calendar var2) throws WCMException;
+
+    Collection<Revision> getChildRevisions(String var1, @Nullable Calendar var2, boolean var3) throws WCMException;
+
+    Collection<Revision> getChildRevisions(String var1, String var2, @Nullable Calendar var3) throws WCMException;
+
+    Page restore(String var1, String var2) throws WCMException;
+
+    Page restoreTree(String var1, Calendar var2) throws WCMException;
+
+    Page restoreTree(String var1, Calendar var2, boolean var3) throws WCMException;
+
+    void touch(Node var1, boolean var2, @Nullable Calendar var3, boolean var4) throws WCMException;
+}
