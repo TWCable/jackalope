@@ -99,5 +99,8 @@ class Version {
     String getBintrayVersion() {
         thisVersion
     }
+}
 
+wrapper {
+    gradleVersion = '2.14.1'
 }
