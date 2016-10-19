@@ -172,7 +172,8 @@ public class PageImpl implements Page {
 
     @Override
     public boolean isHideInNav() {
-        return getProperties().get("hideInNav", Boolean.class);
+        ValueMap props = getProperties();
+        return props.containsKey("hideInNav") ? props.get("hideInNav", Boolean.class) : false;
     }
 
 
@@ -184,7 +185,7 @@ public class PageImpl implements Page {
 
     @Override
     public boolean isValid() {
-        return timeUntilValid() > 0;
+        return timeUntilValid() == 0;
     }
 
 
