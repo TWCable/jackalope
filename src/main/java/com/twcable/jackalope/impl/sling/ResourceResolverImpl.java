@@ -21,17 +21,19 @@ import com.twcable.jackalope.impl.cq.PageManagerImpl;
 import com.twcable.jackalope.impl.jcr.NodeImpl;
 import com.twcable.jackalope.impl.jcr.SessionImpl;
 import com.twcable.jackalope.impl.jcr.ValueImpl;
+import lombok.val;
+import org.apache.jackrabbit.spi.commons.iterator.Iterators;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.jcr.api.SlingRepository;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.jcr.Item;
 import javax.jcr.ItemExistsException;
 import javax.jcr.ItemNotFoundException;
@@ -55,7 +57,7 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @SuppressWarnings("ConstantConditions")
-    public ResourceResolverImpl(@Nonnull SlingRepository repository) {
+    public ResourceResolverImpl(SlingRepository repository) {
         if (repository == null) throw new IllegalArgumentException("Repository cannot be null.");
         try {
             this.session = repository.login();
@@ -67,7 +69,7 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    public Resource resolve(HttpServletRequest request, String absPath) {
+    public Resource resolve(@Nullable HttpServletRequest request, @Nullable String absPath) {
         String path = absPath != null ? absPath : "/";
         Resource resource = getResource(path);
         return resource != null ? resource : new NonExistingResource(this, path);
@@ -75,33 +77,33 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    public Resource resolve(String absPath) {
+    public Resource resolve(@Nullable String absPath) {
         return resolve(null, absPath);
     }
 
 
     @Override
-    public Resource resolve(HttpServletRequest request) {
+    public Resource resolve(@Nullable HttpServletRequest request) {
         return resolve(request, null);
     }
 
 
     @Override
-    public String map(String resourcePath) {
+    public @Nullable String map(@Nullable String resourcePath) {
         LOG.warn("Resource mapping is not implemented");
         return resourcePath;  //TODO: implement resource mapping
     }
 
 
     @Override
-    public String map(HttpServletRequest request, String resourcePath) {
+    public @Nullable String map(@Nullable HttpServletRequest request, @Nullable String resourcePath) {
         LOG.warn("Resource mapping is not implemented");
         return resourcePath;  //TODO: implement resource mapping
     }
 
 
     @Override
-    public Resource getResource(String path) {
+    public @Nullable Resource getResource(@Nullable String path) {
         try {
             return (session.itemExists(path)) ? constructResource(session.getItem(path)) : null;
         }
@@ -112,7 +114,8 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    public Resource getResource(Resource base, String path) {
+    public @Nullable Resource getResource(@Nullable Resource base, @Nullable String path) {
+        if (base == null) return getResource(Paths.resolve("/", path));
         return getResource(Paths.resolve(base.getPath(), path));
     }
 
@@ -124,38 +127,40 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    public Iterator<Resource> listChildren(Resource parent) {
+    public Iterator<Resource> listChildren(@Nullable Resource parent) {
+        if (parent == null) return Iterators.empty();
         return parent.listChildren();
     }
 
 
     @Override
-    public Iterable<Resource> getChildren(Resource resource) {
+    public Iterable<Resource> getChildren(@Nullable Resource resource) {
+        if (resource == null) return Collections.emptyList();
         return resource.getChildren();
     }
 
 
     @Override
-    public Iterator<Resource> findResources(String query, String language) {
-        return null;  //TODO: Implement queries
+    public Iterator<Resource> findResources(@Nullable String query, @Nullable String language) {
+        return Iterators.empty(); //TODO: Implement queries
     }
 
 
     @Override
-    public Iterator<Map<String, Object>> queryResources(String query, String language) {
-        return null;  //TODO: Implement queries
+    public Iterator<Map<String, Object>> queryResources(@Nullable String query, @Nullable String language) {
+        return Iterators.empty(); //TODO: Implement queries
     }
 
 
     @Override
-    public boolean hasChildren(Resource resource) {
+    public boolean hasChildren(@Nullable Resource resource) {
         return listChildren(resource).hasNext();
     }
 
 
     @Override
-    public ResourceResolver clone(Map<String, Object> authenticationInfo) throws LoginException {
-        return null;  //TODO: Implement authentication
+    public ResourceResolver clone(@Nullable Map<String, Object> authenticationInfo) throws LoginException {
+        throw new LoginException("Not implemented");  //TODO: Implement authentication
     }
 
 
@@ -173,24 +178,25 @@ public class ResourceResolverImpl implements ResourceResolver {
 
     @Override
     public String getUserID() {
-        return null;  //TODO: Implement authentication
+        return "";  //TODO: Implement authentication
     }
 
 
     @Override
     public Iterator<String> getAttributeNames() {
+        return Iterators.empty();  //TODO: Implement attributes
+    }
+
+
+    @Override
+    public @Nullable Object getAttribute(@Nullable String name) {
         return null;  //TODO: Implement attributes
     }
 
 
     @Override
-    public Object getAttribute(String name) {
-        return null;  //TODO: Implement attributes
-    }
-
-
-    @Override
-    public void delete(Resource resource) throws PersistenceException {
+    public void delete(@Nullable Resource resource) throws PersistenceException {
+        if (resource == null) throw new PersistenceException("resource == null");
         try {
             session.removeItem(resource.getPath());
         }
@@ -201,7 +207,7 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    public Resource create(@Nonnull Resource parent, @Nonnull String name, @Nullable Map<String, Object> properties) throws PersistenceException {
+    public Resource create(@Nullable Resource parent, @Nullable String name, @Nullable Map<String, Object> properties) throws PersistenceException {
         //noinspection ConstantConditions
         if (parent == null)
             throw new IllegalArgumentException("Could not create a node for \"" + name + "\" because the parent is null");
@@ -215,7 +221,7 @@ public class ResourceResolverImpl implements ResourceResolver {
     }
 
 
-    private Resource createNodeResource(@Nonnull String path, @Nonnull Map<String, Object> properties) {
+    private Resource createNodeResource(String path, Map<String, Object> properties) {
         try {
             if (session.nodeExists(path)) return new NodeResourceImpl(this, session.getNode(path));
         }
@@ -235,7 +241,7 @@ public class ResourceResolverImpl implements ResourceResolver {
     }
 
 
-    private NodeImpl createNode(@Nonnull String path, @Nonnull Map<String, Object> properties) throws ItemNotFoundException, ItemExistsException {
+    private NodeImpl createNode(String path, Map<String, Object> properties) throws ItemNotFoundException, ItemExistsException {
         NodeImpl node = new NodeImpl((SessionImpl)session, path);
 
         for (String propName : properties.keySet()) {
@@ -246,7 +252,7 @@ public class ResourceResolverImpl implements ResourceResolver {
     }
 
 
-    private static void setNodeProperty(@Nonnull NodeImpl node, @Nonnull String propName, @Nonnull Object propertyVal) {
+    private static void setNodeProperty(NodeImpl node, String propName, Object propertyVal) {
         try {
             node.setProperty(propName, new ValueImpl(propertyVal));
         }
@@ -273,20 +279,23 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    public String getParentResourceType(Resource resource) {
-        return resource.getParent().getResourceType();
+    public @Nullable String getParentResourceType(@Nullable Resource resource) {
+        if (resource == null) return null;
+        val parent = resource.getParent();
+        if (parent == null) return null;
+        return parent.getResourceType();
     }
 
 
     @Override
-    public String getParentResourceType(String s) {
-        return null;
+    public @Nullable String getParentResourceType(@Nullable String s) {
+        return getParentResourceType(resolve(s));
     }
 
 
     @Override
-    public boolean isResourceType(Resource resource, String resourceType) {
-        return resource.isResourceType(resourceType);
+    public boolean isResourceType(@Nullable Resource resource, @Nullable String resourceType) {
+        return resource != null && resourceType != null && resource.isResourceType(resourceType);
     }
 
 
@@ -296,8 +305,8 @@ public class ResourceResolverImpl implements ResourceResolver {
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+    @SuppressWarnings({"unchecked", "TypeParameterExplicitlyExtendsObject"})
+    public <AdapterType extends @NonNull Object> @Nullable AdapterType adaptTo(Class<AdapterType> type) {
         if (type.equals(Session.class)) return (AdapterType)session;
         if (type.equals(PageManager.class)) return (AdapterType)new PageManagerImpl(this);
         else return null;

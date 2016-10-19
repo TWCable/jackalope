@@ -16,6 +16,7 @@
 package com.twcable.jackalope.impl.common;
 
 import com.google.common.base.Strings;
+import lombok.val;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -75,7 +76,8 @@ public final class Paths {
      * @param path The path
      * @return The last segment of the path
      */
-    public static String basename(String path) {
+    public static String basename(@Nullable String path) {
+        if (path == null) return "";
         return path.contains(SEPARATOR) ? path.substring(path.lastIndexOf(SEPARATOR) + 1) : path;
     }
 
@@ -83,24 +85,37 @@ public final class Paths {
     /**
      * Returns true if the first path is an ancestor of the second path
      *
-     * @param first  The first path
-     * @param second The second path
+     * @param first  The first path; null is effectively an empty string
+     * @param second The second path; null is effectively an empty string
      * @return True if the first path is an ancestor of the second path
      */
-    public static boolean ancestorOf(String first, String second) {
-        return !Strings.isNullOrEmpty(first) && !first.equals(second) && second.startsWith(first);
+    public static boolean ancestorOf(@Nullable String first, @Nullable String second) {
+        val firstPath = first != null ? first : "";
+        val secondPath = second != null ? second : "";
+        val selfOrAncestorOf = selfOrAncestorOf(firstPath, secondPath);
+        return selfOrAncestorOf && !firstPath.equals(secondPath);
     }
 
 
     /**
-     * Returns true if the first path is an ancestor of the second path
+     * Returns true if the first path is either the same or an ancestor of the second path
      *
-     * @param first  The first path
-     * @param second The second path
-     * @return True if the first path is an ancestor of the second path
+     * @param first  The first path; null is effectively an empty string
+     * @param second The second path; null is effectively an empty string
+     * @return True if the first path is either the same or an ancestor of the second path
      */
-    public static boolean selfOrAncestorOf(String first, String second) {
-        return (!Strings.isNullOrEmpty(first) && first.equals(second)) || ancestorOf(first, second);
+    @SuppressWarnings("RedundantIfStatement")
+    public static boolean selfOrAncestorOf(@Nullable String first, @Nullable String second) {
+        val firstPath = first != null ? first : "";
+        val secondPath = second != null ? second : "";
+        if (firstPath.isEmpty()) {
+            if (secondPath.isEmpty()) return true;
+            else return false;
+        }
+        else {
+            if (secondPath.startsWith(firstPath)) return true;
+            else return false;
+        }
     }
 
 
@@ -120,22 +135,22 @@ public final class Paths {
     /**
      * Returns true it the path is an absolute path (i.e. starts with '/')
      *
-     * @param path The path
+     * @param path The path; null is treated as an empty string
      * @return True it the path is an absolute path (i.e. starts with '/')
      */
-    public static boolean isAbsolute(String path) {
-        return path.startsWith("/");
+    public static boolean isAbsolute(@Nullable String path) {
+        return path != null && path.startsWith("/");
     }
 
 
     /**
      * Returns true it the path is the root path (i.e. '/')
      *
-     * @param path The path
+     * @param path The path; null is treated as an empty string
      * @return True it the path is the root path (i.e. '/')
      */
-    public static boolean isRoot(String path) {
-        return path.equals("/");
+    public static boolean isRoot(@Nullable String path) {
+        return path != null && path.equals("/");
     }
 
 
@@ -148,10 +163,12 @@ public final class Paths {
      * the second (child) path to the first (parent) path.
      */
     //TODO: Normalize the paths
-    public static String resolve(String first, String second) {
-        return isAbsolute(second) ? second :
-            Strings.isNullOrEmpty(first) || isRoot(first) ? first + second :
-                first + SEPARATOR + second;
+    public static String resolve(@Nullable String first, @Nullable String second) {
+        val firstPath = first != null ? first : "";
+        val secondPath = second != null ? second : "";
+        if (isAbsolute(secondPath)) return secondPath;
+        else if (firstPath.isEmpty() || isRoot(firstPath)) return first + secondPath;
+        else return firstPath + SEPARATOR + secondPath;
     }
 
 

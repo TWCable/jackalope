@@ -17,6 +17,7 @@ package com.twcable.jackalope.impl.common
 
 import spock.lang.Specification
 import spock.lang.Subject
+import spock.lang.Unroll
 
 @Subject(Paths)
 class PathsSpec extends Specification {
@@ -83,7 +84,8 @@ class PathsSpec extends Specification {
     }
 
 
-    def "ancestorOf returns true if the first path is an ancestor of the second path"() {
+    @Unroll
+    def "ancestorOf returns #expected if \"#first\" is an ancestor of \"#second\""() {
         expect:
         Paths.ancestorOf(first, second) == expected
 
@@ -95,22 +97,37 @@ class PathsSpec extends Specification {
         "/segment" | "/segment"     | false
         "segment"  | "segment/next" | true
         "a/b/c"    | "a/b/c/d/e/f"  | true
+        null       | null           | false
+        ""         | null           | false
+        null       | ""             | false
+        "/"         | null          | false
+        null       | "/"            | false
+        "/segment" | null           | false
+        null       | "/segment"     | false
     }
 
 
-    def "selfOrAncestorOf returns true if the first path is or is an ancestor of the second path"() {
+    @Unroll
+    def "selfOrAncestorOf returns #expected if \"#first\" is or is an ancestor of \"#second\""() {
         expect:
         Paths.selfOrAncestorOf(first, second) == expected
 
         where:
         first      | second         | expected
-        ""         | ""             | false
+        ""         | ""             | true
         ""         | "/"            | false
         "/"        | "/segment"     | true
         "/segment" | "/segment"     | true
         "segment"  | "segment"      | true
         "segment"  | "segment/next" | true
         "a/b/c"    | "a/b/c/d/e/f"  | true
+        null       | null           | true
+        ""         | null           | true
+        null       | ""             | true
+        "/"         | null          | false
+        null       | "/"            | false
+        "/segment" | null           | false
+        null       | "/segment"     | false
     }
 
 

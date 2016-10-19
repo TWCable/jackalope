@@ -1,0 +1,69 @@
+package org.apache.sling.api.resource;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.Iterator;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.sling.api.adapter.Adaptable;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.api.resource.Resource;
+
+public interface ResourceResolver extends Adaptable {
+    Resource resolve(@Nullable HttpServletRequest var1, @Nullable String var2);
+
+    Resource resolve(@Nullable String var1);
+
+    Resource resolve(@Nullable HttpServletRequest var1);
+
+    @Nullable String map(@Nullable String var1);
+
+    @Nullable String map(@Nullable HttpServletRequest var1, @Nullable String var2);
+
+    @Nullable Resource getResource(@Nullable String var1);
+
+    @Nullable Resource getResource(@Nullable Resource var1, @Nullable String var2);
+
+    String[] getSearchPath();
+
+    Iterator<Resource> listChildren(Resource var1);
+
+    Iterable<Resource> getChildren(Resource var1);
+
+    Iterator<Resource> findResources(@Nullable String var1, @Nullable String var2);
+
+    Iterator<Map<String, Object>> queryResources(@Nullable String var1, @Nullable String var2);
+
+    boolean hasChildren(@Nullable Resource var1);
+
+    ResourceResolver clone(@Nullable Map<String, Object> var1) throws LoginException;
+
+    boolean isLive();
+
+    void close();
+
+    String getUserID();
+
+    Iterator<String> getAttributeNames();
+
+    @Nullable Object getAttribute(@Nullable String var1);
+
+    void delete(@Nullable Resource var1) throws PersistenceException;
+
+    Resource create(@Nullable Resource var1, @Nullable String var2, @Nullable Map<String, Object> var3) throws PersistenceException;
+
+    void revert();
+
+    void commit() throws PersistenceException;
+
+    boolean hasChanges();
+
+    @Nullable String getParentResourceType(@Nullable Resource var1);
+
+    @Nullable String getParentResourceType(@Nullable String var1);
+
+    boolean isResourceType(@Nullable Resource var1, @Nullable String var2);
+
+    void refresh();
+}
