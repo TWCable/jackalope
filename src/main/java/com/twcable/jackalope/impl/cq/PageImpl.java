@@ -21,6 +21,7 @@ import com.day.cq.commons.LabeledResource;
 import com.day.cq.tagging.Tag;
 import com.day.cq.tagging.TagManager;
 import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageFilter;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.Template;
 import com.day.cq.wcm.api.WCMException;
@@ -75,19 +76,19 @@ public class PageImpl implements Page {
 
     @Override
     public Iterator<Page> listChildren() {
-        return listChildren(null);
+        return listChildren(new PageFilter());
     }
 
 
     @Override
     public Iterator<Page> listChildren(Filter<Page> pageFilter) {
-        return new PageIteratorImpl(resource, pageFilter);
+        return listChildren(pageFilter, false);
     }
 
 
     @Override
     public Iterator<Page> listChildren(Filter<Page> pageFilter, boolean deep) {
-        return new PageIteratorImpl(resource, pageFilter);
+        return new PageIteratorImpl(resource, pageFilter, deep);
     }
 
 

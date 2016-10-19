@@ -33,17 +33,13 @@ public class PageIteratorImpl implements Iterator<Page> {
     private final Iterator<Page> iterator;
 
 
-    public PageIteratorImpl(Resource resource, Filter<Page> filter) {
-        List<Page> pages = new LinkedList<>();
-        for (Resource next : Lists.newArrayList(resource.listChildren())) {
-            Page page = next.adaptTo(Page.class);
-            if (page == null || !filter.includes(page)) continue;
-            pages.add(page);
-        }
-
-        this.iterator = pages.iterator();
+    public PageIteratorImpl(Resource resource, Filter<Page> filter, boolean deep) {
+        this.iterator = getChildren(resource, filter, deep).iterator();
     }
 
+    public PageIteratorImpl(Resource resource, Filter<Page> filter) {
+        this(resource, filter, false);
+    }
 
     @Override
     public boolean hasNext() {
@@ -60,5 +56,18 @@ public class PageIteratorImpl implements Iterator<Page> {
     @Override
     public void remove() {
         iterator.remove();
+    }
+
+    private List<Page> getChildren(Resource resource, Filter<Page> filter, boolean deep) {
+        List<Page> pages = new LinkedList<>();
+        for (Resource next : Lists.newArrayList(resource.listChildren())) {
+            Page page = next.adaptTo(Page.class);
+            if (page == null || !filter.includes(page)) continue;
+            pages.add(page);
+            if (deep) {
+                pages.addAll(getChildren(page.adaptTo(Resource.class), filter, true));
+            }
+        }
+        return pages;
     }
 }
