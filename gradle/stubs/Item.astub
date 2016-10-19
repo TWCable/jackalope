@@ -1,0 +1,45 @@
+package javax.jcr;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.version.VersionException;
+
+public interface Item {
+
+    public @NonNull String getPath() throws RepositoryException;
+
+    public @NonNull String getName() throws RepositoryException;
+
+    public @NonNull Item getAncestor(int depth) throws ItemNotFoundException, AccessDeniedException, RepositoryException;
+
+    public @NonNull Node getParent() throws ItemNotFoundException, AccessDeniedException, RepositoryException;
+
+    public int getDepth() throws RepositoryException;
+
+    public @NonNull Session getSession() throws RepositoryException;
+
+    public boolean isNode();
+
+    public boolean isNew();
+
+    public boolean isModified();
+
+    public boolean isSame(@Nullable Item otherItem) throws RepositoryException;
+
+    public void accept(@Nullable ItemVisitor visitor) throws RepositoryException;
+
+    public void save()
+        throws AccessDeniedException, ItemExistsException, ConstraintViolationException, InvalidItemStateException,
+        ReferentialIntegrityException, VersionException, LockException, NoSuchNodeTypeException,
+        RepositoryException;
+
+    public void refresh(boolean keepChanges) throws InvalidItemStateException, RepositoryException;
+
+    public void remove()
+        throws VersionException, LockException, ConstraintViolationException, AccessDeniedException,
+        RepositoryException;
+
+}

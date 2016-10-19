@@ -16,6 +16,7 @@
 package com.twcable.jackalope.impl.common;
 
 import com.google.common.base.Strings;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utilities for manipulating path strings.
@@ -34,7 +35,8 @@ public final class Paths {
      * @param path The path
      * @return The first segment of the path
      */
-    public static String head(String path) {
+    public static String head(@Nullable String path) {
+        if (path == null) return "";
         path = stripRoot(path);
         return path.contains(SEPARATOR) ? path.substring(0, path.indexOf(SEPARATOR)) : path;
     }
@@ -46,7 +48,8 @@ public final class Paths {
      * @param path The path
      * @return The segments of the path after the first
      */
-    public static String tail(String path) {
+    public static String tail(@Nullable String path) {
+        if (path == null) return "";
         path = stripRoot(path);
         return path.contains(SEPARATOR) ? path.substring(path.indexOf(SEPARATOR) + 1) : "";
     }
@@ -58,7 +61,8 @@ public final class Paths {
      * @param path The path
      * @return The segments of the path before the last segment
      */
-    public static String parent(String path) {
+    public static String parent(@Nullable String path) {
+        if (path == null) return "/";
         String prefix = isAbsolute(path) && !isRoot(path) ? "/" : "";
         path = stripRoot(path);
         return prefix + (path.contains(SEPARATOR) ? path.substring(0, path.lastIndexOf(SEPARATOR)) : "");
@@ -106,7 +110,8 @@ public final class Paths {
      * @param path The path
      * @return The number of segments in the path. Returns 0 if the path is empty or the root path.
      */
-    public static int depth(String path) {
+    public static int depth(@Nullable String path) {
+        if (path == null) return 0;
         path = stripRoot(path);
         return !Strings.isNullOrEmpty(path) ? path.split(SEPARATOR).length : 0;
     }
@@ -156,7 +161,8 @@ public final class Paths {
      * @param path The path to be modified
      * @return The path with the root element removed.
      */
-    private static String stripRoot(String path) {
+    private static String stripRoot(@Nullable String path) {
+        if (path == null) return "";
         return isAbsolute(path) ? path.substring(1) : path;
     }
 }

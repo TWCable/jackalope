@@ -1,0 +1,107 @@
+package javax.jcr;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import javax.jcr.lock.LockException;
+import javax.jcr.lock.LockManager;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.retention.RetentionManager;
+import javax.jcr.security.AccessControlManager;
+import javax.jcr.version.VersionException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
+
+public interface Session {
+
+    public @NonNull Repository getRepository();
+
+    public @Nullable String getUserID();
+
+    public String[] getAttributeNames();
+
+    public @Nullable Object getAttribute(@Nullable String name);
+
+    public Workspace getWorkspace();
+
+    public Node getRootNode() throws RepositoryException;
+
+    public Session impersonate(@Nullable Credentials credentials) throws LoginException, RepositoryException;
+
+    public Node getNodeByUUID(@Nullable String uuid) throws ItemNotFoundException, RepositoryException;
+
+    public Node getNodeByIdentifier(@Nullable String id) throws ItemNotFoundException, RepositoryException;
+
+    public Item getItem(@Nullable String absPath) throws PathNotFoundException, RepositoryException;
+
+    public Node getNode(@Nullable String absPath) throws PathNotFoundException, RepositoryException;
+
+    public Property getProperty(@Nullable String absPath) throws PathNotFoundException, RepositoryException;
+
+    public boolean itemExists(@Nullable String absPath) throws RepositoryException;
+
+    public boolean nodeExists(@Nullable String absPath) throws RepositoryException;
+
+    boolean propertyExists(@Nullable String absPath) throws RepositoryException;
+
+    public void move(@Nullable String srcAbsPath, @Nullable String destAbsPath)
+        throws ItemExistsException, PathNotFoundException, VersionException, ConstraintViolationException, LockException, RepositoryException;
+
+    public void removeItem(@Nullable String absPath)
+        throws VersionException, LockException, ConstraintViolationException, AccessDeniedException, RepositoryException;
+
+    public void save() throws AccessDeniedException, ItemExistsException, ReferentialIntegrityException, ConstraintViolationException, InvalidItemStateException, VersionException, LockException, NoSuchNodeTypeException, RepositoryException;
+
+    public void refresh(boolean keepChanges) throws RepositoryException;
+
+    public boolean hasPendingChanges() throws RepositoryException;
+
+    public ValueFactory getValueFactory() throws UnsupportedRepositoryOperationException, RepositoryException;
+
+    public boolean hasPermission(@Nullable String absPath, @Nullable String actions) throws RepositoryException;
+
+    public void checkPermission(@Nullable String absPath, @Nullable String actions) throws java.security.AccessControlException, RepositoryException;
+
+    public boolean hasCapability(@Nullable String methodName, @Nullable Object target, Object[] arguments) throws RepositoryException;
+
+    public ContentHandler getImportContentHandler(@Nullable String parentAbsPath, int uuidBehavior) throws PathNotFoundException, ConstraintViolationException, VersionException, LockException, RepositoryException;
+
+    public void importXML(@Nullable String parentAbsPath, @Nullable InputStream in, int uuidBehavior)
+        throws IOException, PathNotFoundException, ItemExistsException, ConstraintViolationException, VersionException, InvalidSerializedDataException, LockException, RepositoryException;
+
+    public void exportSystemView(@Nullable String absPath, @Nullable ContentHandler contentHandler, boolean skipBinary, boolean noRecurse) throws PathNotFoundException, SAXException, RepositoryException;
+
+    public void exportSystemView(@Nullable String absPath, @Nullable OutputStream out, boolean skipBinary, boolean noRecurse) throws IOException, PathNotFoundException, RepositoryException;
+
+    public void exportDocumentView(@Nullable String absPath, @Nullable ContentHandler contentHandler, boolean skipBinary, boolean noRecurse) throws PathNotFoundException, SAXException, RepositoryException;
+
+    public void exportDocumentView(@Nullable String absPath, @Nullable OutputStream out, boolean skipBinary, boolean noRecurse) throws IOException, PathNotFoundException, RepositoryException;
+
+    public void setNamespacePrefix(@Nullable String prefix, @Nullable String uri) throws NamespaceException, RepositoryException;
+
+    public String[] getNamespacePrefixes() throws RepositoryException;
+
+    public String getNamespaceURI(@Nullable String prefix) throws NamespaceException, RepositoryException;
+
+    public String getNamespacePrefix(@Nullable String uri) throws NamespaceException, RepositoryException;
+
+    public void logout();
+
+    public boolean isLive();
+
+    public void addLockToken(@Nullable String lt);
+
+    public String[] getLockTokens();
+
+    public void removeLockToken(@Nullable String lt);
+
+    public AccessControlManager getAccessControlManager()
+        throws UnsupportedRepositoryOperationException, RepositoryException;
+
+    public RetentionManager getRetentionManager()
+        throws UnsupportedRepositoryOperationException, RepositoryException;
+}

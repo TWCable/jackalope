@@ -17,9 +17,9 @@ package com.twcable.jackalope.impl.jcr;
 
 import com.google.common.base.Strings;
 import com.twcable.jackalope.impl.common.Paths;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.jcr.AccessDeniedException;
 import javax.jcr.InvalidItemStateException;
 import javax.jcr.Item;
@@ -48,9 +48,8 @@ public abstract class ItemImpl implements Item {
      *
      * @param session The session for which this Item is being constructed
      * @param path    The jcr path of this item
-     * @throws ItemNotFoundException
-     * @throws ItemExistsException
      */
+    @SuppressWarnings("argument.type.incompatible")
     ItemImpl(@Nonnull SessionImpl session, @Nonnull String path) throws ItemNotFoundException, ItemExistsException {
         this.session = session;
         this.path = path;
@@ -71,18 +70,16 @@ public abstract class ItemImpl implements Item {
 
 
     @Override
-    @Nonnull
     public String getName() {
         return Paths.basename(path);
     }
 
 
     @Override
-    @Nullable
     public Item getAncestor(int depth) throws ItemNotFoundException, RepositoryException {
         int myDepth = getDepth();
         if (depth > myDepth) throw new ItemNotFoundException();
-        return (depth < myDepth) ? ((NodeImpl)getParent()).getAncestor(depth) : null;
+        return depth < myDepth ? ((NodeImpl)getParent()).getAncestor(depth) : this;
     }
 
 
@@ -95,7 +92,7 @@ public abstract class ItemImpl implements Item {
     }
 
 
-    ItemImpl getParentImpl() {
+    @Nullable ItemImpl getParentImpl() {
         try {
             return (ItemImpl)getParent();
         }
@@ -134,15 +131,16 @@ public abstract class ItemImpl implements Item {
 
 
     @Override
-    public boolean isSame(Item otherItem) throws RepositoryException {
-        return Objects.equals(path, otherItem.getPath())
+    public boolean isSame(@Nullable Item otherItem) throws RepositoryException {
+        return otherItem != null
+            && Objects.equals(path, otherItem.getPath())
             && (isNode() == otherItem.isNode())
             && (isNode() || getParent().isSame(otherItem.getParent()));
     }
 
 
     @Override
-    public abstract void accept(ItemVisitor visitor) throws RepositoryException;
+    public abstract void accept(@Nullable ItemVisitor visitor) throws RepositoryException;
 
 
     @Override
