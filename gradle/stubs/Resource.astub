@@ -1,0 +1,37 @@
+package org.apache.sling.api.resource;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.Iterator;
+import org.apache.sling.api.adapter.Adaptable;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
+
+public interface Resource extends Adaptable {
+    String getPath();
+
+    String getName();
+
+    @Nullable Resource getParent();
+
+    Iterator<Resource> listChildren();
+
+    Iterable<Resource> getChildren();
+
+    @Nullable Resource getChild(String var1);
+
+    String getResourceType();
+
+    @Nullable String getResourceSuperType();
+
+    boolean hasChildren();
+
+    boolean isResourceType(@Nullable String var1);
+
+    ResourceMetadata getResourceMetadata();
+
+    ResourceResolver getResourceResolver();
+
+    ValueMap getValueMap();
+}

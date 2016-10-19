@@ -15,9 +15,12 @@
  */
 package com.twcable.jackalope.impl.sling;
 
+import org.apache.jackrabbit.spi.commons.iterator.Iterators;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.jcr.Item;
 import javax.jcr.Node;
@@ -29,6 +32,7 @@ import static org.apache.sling.jcr.resource.JcrResourceConstants.SLING_RESOURCE_
 /**
  * Basic abstract class to implement an {@link Item} as a {@link Resource}
  */
+@SuppressWarnings("WeakerAccess")
 abstract public class ItemResourceImpl implements Resource {
     final ResourceResolver resourceResolver;
     final Item item;
@@ -64,12 +68,12 @@ abstract public class ItemResourceImpl implements Resource {
 
     @Override
     public Iterator<Resource> listChildren() {
-        return null;
+        return Iterators.empty();
     }
 
 
     @Override
-    public Resource getParent() {
+    public @Nullable Resource getParent() {
         try {
             return resourceResolver.getResource(item.getParent().getPath());
         }
@@ -80,25 +84,26 @@ abstract public class ItemResourceImpl implements Resource {
 
 
     @Override
-    public Resource getChild(String relPath) {
+    public @Nullable Resource getChild(String relPath) {
         return null;
     }
 
 
     @Override
     public String getResourceType() {
+        return Resource.RESOURCE_TYPE_NON_EXISTING;
+    }
+
+
+    @Override
+    public @Nullable String getResourceSuperType() {
         return null;
     }
 
 
     @Override
-    public String getResourceSuperType() {
-        return null;
-    }
-
-
-    @Override
-    public boolean isResourceType(String resourceType) {
+    public boolean isResourceType(@Nullable String resourceType) {
+        if (resourceType == null) return getResourceType().equals(Resource.RESOURCE_TYPE_NON_EXISTING);
         return resourceType.equals(getResourceType());
     }
 
@@ -118,12 +123,14 @@ abstract public class ItemResourceImpl implements Resource {
 
 
     @Override
-    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+    @SuppressWarnings("TypeParameterExplicitlyExtendsObject")
+    public <AdapterType extends @NonNull Object> @Nullable AdapterType adaptTo(Class<AdapterType> type) {
         return null;
     }
 
 
-    protected String getResourceTypeForNode(Node node) throws RepositoryException {
+    protected String getResourceTypeForNode(@Nullable Node node) throws RepositoryException {
+        if (node == null) return Resource.RESOURCE_TYPE_NON_EXISTING;
         return node.hasProperty(SLING_RESOURCE_TYPE_PROPERTY)
             ? node.getProperty(SLING_RESOURCE_TYPE_PROPERTY).getString()
             : node.getPrimaryNodeType().getName();

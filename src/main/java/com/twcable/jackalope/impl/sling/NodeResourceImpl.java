@@ -22,6 +22,7 @@ import com.twcable.jackalope.impl.common.Paths;
 import com.twcable.jackalope.impl.cq.AssetImpl;
 import com.twcable.jackalope.impl.cq.PageImpl;
 import com.twcable.jackalope.impl.jcr.JcrUtils;
+import lombok.val;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistableValueMap;
 import org.apache.sling.api.resource.Resource;
@@ -31,12 +32,15 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.jcr.resource.JcrModifiablePropertyMap;
 import org.apache.sling.jcr.resource.JcrPropertyMap;
 import org.apache.sling.jcr.resource.internal.JcrModifiableValueMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +53,7 @@ import static org.apache.jackrabbit.JcrConstants.NT_FILE;
 /**
  * Implement sling Resource for a jcr Node
  */
+@SuppressWarnings("RedundantCast")
 public class NodeResourceImpl extends ItemResourceImpl {
     private final Node node;
 
@@ -75,20 +80,24 @@ public class NodeResourceImpl extends ItemResourceImpl {
     public Iterable<Resource> getChildren() {
         try {
             List<Resource> children = new ArrayList<>();
-            for (Node child : JcrUtils.getChildNodes(node))
-                children.add(resourceResolver.getResource(this, child.getName()));
+            for (Node child : JcrUtils.getChildNodes(node)) {
+                val resource = resourceResolver.getResource(this, child.getName());
+                if (resource != null)
+                    children.add(resource);
+            }
             return children;
         }
         catch (RepositoryException re) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 
 
     @Override
-    public Resource getChild(String relPath) {
+    public @Nullable Resource getChild(String relPath) {
         try {
-            return resourceResolver.getResource(Paths.resolve(node.getPath(), relPath));
+            val resolvedPath = Paths.resolve(node.getPath(), relPath);
+            return resourceResolver.getResource(resolvedPath);
         }
         catch (RepositoryException re) {
             throw new SlingRepositoryException(re);
@@ -102,13 +111,13 @@ public class NodeResourceImpl extends ItemResourceImpl {
             return getResourceTypeForNode(node);
         }
         catch (RepositoryException re) {
-            return null; /* ignore */
+            return RESOURCE_TYPE_NON_EXISTING; /* ignore */
         }
     }
 
 
     @Override
-    public String getResourceSuperType() {
+    public @Nullable String getResourceSuperType() {
         return null; //TODO: implement resource supertypes
     }
 
@@ -121,17 +130,21 @@ public class NodeResourceImpl extends ItemResourceImpl {
 
     @Override
     public ValueMap getValueMap() {
-        return this.adaptTo(ValueMap.class);
+        return (@NonNull ValueMap)this.adaptTo(ValueMap.class);
     }
 
 
     @Override
-    @SuppressWarnings({"unchecked", "deprecation"})
-    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+    @SuppressWarnings({"unchecked", "deprecation", "TypeParameterExplicitlyExtendsObject"})
+    public <AdapterType extends @NonNull Object> @Nullable AdapterType adaptTo(Class<AdapterType> type) {
         if (type.equals(Node.class)) return (AdapterType)node;
         if (type.equals(ValueMap.class) || type.equals(Map.class)) return (AdapterType)new JcrPropertyMap(node);
         if (type.equals(PersistableValueMap.class)) return (AdapterType)new JcrModifiablePropertyMap(node);
-        if (type.equals(ModifiableValueMap.class)) return (AdapterType)new JcrModifiableValueMap(node, null);
+        if (type.equals(ModifiableValueMap.class)) {
+            @SuppressWarnings("argument.type.incompatible")
+            val valueMap = (AdapterType)new JcrModifiableValueMap(node, null);
+            return valueMap;
+        }
 
         if (type.equals(Page.class)) {
             try {
