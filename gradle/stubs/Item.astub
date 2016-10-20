@@ -29,7 +29,7 @@ public interface Item {
 
     public boolean isSame(@Nullable Item otherItem) throws RepositoryException;
 
-    public void accept(@Nullable ItemVisitor visitor) throws RepositoryException;
+    public void accept(ItemVisitor visitor) throws RepositoryException;
 
     public void save()
         throws AccessDeniedException, ItemExistsException, ConstraintViolationException, InvalidItemStateException,

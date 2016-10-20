@@ -83,14 +83,14 @@ public class PropertyImpl extends ItemImpl implements Property {
 
 
     @Override
-    public void setValue(@Nonnull Value[] values) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public void setValue(Value[] values) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         this.values = values;
         session.changeItem(this);
     }
 
 
     @Override
-    public void setValue(@Nonnull String value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public void setValue(String value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         setValue(new ValueImpl(value));
     }
 

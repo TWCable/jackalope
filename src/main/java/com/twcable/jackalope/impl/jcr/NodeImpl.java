@@ -17,6 +17,8 @@ package com.twcable.jackalope.impl.jcr;
 
 import com.twcable.jackalope.impl.common.Paths;
 import com.twcable.jackalope.impl.common.Values;
+import org.apache.jackrabbit.value.ReferenceValue;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.Nonnull;
 import javax.jcr.AccessDeniedException;
@@ -51,8 +53,8 @@ import javax.jcr.version.VersionHistory;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -90,13 +92,13 @@ public class NodeImpl extends ItemImpl implements Node {
 
 
     @Override
-    public void orderBefore(String srcChildRelPath, String destChildRelPath) throws UnsupportedRepositoryOperationException, VersionException, ConstraintViolationException, ItemNotFoundException, LockException, RepositoryException {
+    public void orderBefore(String srcChildRelPath, @Nullable String destChildRelPath) throws UnsupportedRepositoryOperationException, VersionException, ConstraintViolationException, ItemNotFoundException, LockException, RepositoryException {
         throw new UnsupportedRepositoryOperationException();
     }
 
 
     @Override
-    public Property setProperty(String name, Value value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, @Nullable Value value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         if (value == null) {
             if (hasProperty(name))
                 getProperty(name).remove();
@@ -110,13 +112,13 @@ public class NodeImpl extends ItemImpl implements Node {
 
 
     @Override
-    public Property setProperty(String name, Value value, int type) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, @Nullable Value value, int type) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, value); // TODO: Implement type conversions
     }
 
 
     @Override
-    public Property setProperty(String name, Value[] values) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, Value[] values) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         PropertyImpl property = getOrCreateProperty(name);
         property.setValue(values);
         session.changeItem(this);
@@ -125,25 +127,25 @@ public class NodeImpl extends ItemImpl implements Node {
 
 
     @Override
-    public Property setProperty(String name, Value[] values, int type) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, Value[] values, int type) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, values); // TODO: Implement type conversions
     }
 
 
     @Override
-    public Property setProperty(String name, String[] values) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, String[] values) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, Values.convertStringsToValues(values));
     }
 
 
     @Override
-    public Property setProperty(String name, String[] values, int type) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, String[] values, int type) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, values); // TODO: Implement type conversions
     }
 
 
     @Override
-    public Property setProperty(String name, String value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, String value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, new ValueImpl(value));
     }
 
@@ -156,50 +158,50 @@ public class NodeImpl extends ItemImpl implements Node {
 
 
     @Override
-    public Property setProperty(String name, InputStream value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, InputStream value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return null;  //deprecated
     }
 
 
     @Override
-    public Property setProperty(String name, Binary value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, Binary value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, new ValueImpl(value));
     }
 
 
     @Override
-    public Property setProperty(String name, boolean value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, boolean value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, new ValueImpl(value));
     }
 
 
     @Override
-    public Property setProperty(String name, double value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, double value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, new ValueImpl(value));
     }
 
 
     @Override
-    public Property setProperty(String name, BigDecimal value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, BigDecimal value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, new ValueImpl(value));
     }
 
 
     @Override
-    public Property setProperty(String name, long value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, long value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, new ValueImpl(value));
     }
 
 
     @Override
-    public Property setProperty(String name, Calendar value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+    public @Nullable Property setProperty(String name, Calendar value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
         return setProperty(name, new ValueImpl(value));
     }
 
 
     @Override
-    public Property setProperty(String name, Node value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
-        return null;  // Not implemented
+    public @Nullable Property setProperty(String name, Node value) throws ValueFormatException, VersionException, LockException, ConstraintViolationException, RepositoryException {
+        return setProperty(name, new ReferenceValue(value));
     }
 
 
@@ -251,19 +253,19 @@ public class NodeImpl extends ItemImpl implements Node {
 
     @Override
     public PropertyIterator getProperties(String namePattern) throws RepositoryException {
-        return null;  //Not implemented
+        return new PropertyIteratorImpl(Collections.emptyList());  //Not implemented
     }
 
 
     @Override
     public PropertyIterator getProperties(String[] nameGlobs) throws RepositoryException {
-        return null;  //Not implemented
+        return new PropertyIteratorImpl(Collections.emptyList());  //Not implemented
     }
 
 
     @Override
     public Item getPrimaryItem() throws ItemNotFoundException, RepositoryException {
-        return null;  //Not implemented
+        throw new ItemNotFoundException();  // TODO implemented
     }
 
 
@@ -287,25 +289,25 @@ public class NodeImpl extends ItemImpl implements Node {
 
     @Override
     public PropertyIterator getReferences() throws RepositoryException {
-        return null;  //Not implemented
+        return new PropertyIteratorImpl(Collections.emptyList());  //Not implemented
     }
 
 
     @Override
     public PropertyIterator getReferences(String name) throws RepositoryException {
-        return null;  //Not implemented
+        return new PropertyIteratorImpl(Collections.emptyList());  //Not implemented
     }
 
 
     @Override
     public PropertyIterator getWeakReferences() throws RepositoryException {
-        return null;  //Not implemented
+        return new PropertyIteratorImpl(Collections.emptyList());  //Not implemented
     }
 
 
     @Override
     public PropertyIterator getWeakReferences(String name) throws RepositoryException {
-        return null;  //Not implemented
+        return new PropertyIteratorImpl(Collections.emptyList());  //Not implemented
     }
 
 
@@ -413,19 +415,19 @@ public class NodeImpl extends ItemImpl implements Node {
 
     @Override
     public NodeIterator merge(String srcWorkspace, boolean bestEffort) throws NoSuchWorkspaceException, AccessDeniedException, MergeException, LockException, InvalidItemStateException, RepositoryException {
-        return null;  //deprecated
+        return new NodeIteratorImpl(Collections.emptyList());  //deprecated
     }
 
 
     @Override
     public String getCorrespondingNodePath(String workspaceName) throws ItemNotFoundException, NoSuchWorkspaceException, AccessDeniedException, RepositoryException {
-        return null;  //Not Implemented
+        return "";  // TODO not implemented
     }
 
 
     @Override
     public NodeIterator getSharedSet() throws RepositoryException {
-        return new NodeIteratorImpl(Arrays.asList((Node)this));  //To change body of implemented methods use File | Settings | File Templates.
+        return new NodeIteratorImpl(Collections.emptyList());
     }
 
 
