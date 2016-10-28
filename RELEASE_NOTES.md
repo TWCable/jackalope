@@ -1,5 +1,8 @@
 # RELEASE NOTES
 
+## 4.0.0
+* Updated to support AEM 6.2, from AEM 6.0
+
 ## 3.0.2
 
 Bug fixes:
