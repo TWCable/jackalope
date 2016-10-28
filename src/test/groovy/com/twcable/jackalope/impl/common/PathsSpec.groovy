@@ -169,4 +169,20 @@ class PathsSpec extends Specification {
         "/segment" | "next"    | "/segment/next"
         "/segment" | "/next"   | "/next"
     }
+
+    def "strip trailing separator"() {
+        expect:
+        Paths.stripTrailingSeparator(path) == expected
+
+        where:
+        path | expected
+        null             | null
+        "/"              | "/"
+        "/segment"       | "/segment"
+        "/segment/"      | "/segment"
+        "/segment/next"  | "/segment/next"
+        "/segment/next/" | "/segment/next"
+
+
+    }
 }

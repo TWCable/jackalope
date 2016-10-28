@@ -54,7 +54,7 @@ public abstract class ItemImpl implements Item {
      */
     ItemImpl(@Nonnull SessionImpl session, @Nonnull String path) throws ItemNotFoundException, ItemExistsException {
         this.session = session;
-        this.path = path;
+        this.path = Paths.stripTrailingSeparator(path);
         session.addItem(this);
     }
 
@@ -67,7 +67,7 @@ public abstract class ItemImpl implements Item {
 
 
     void setPath(String path) {
-        this.path = path;
+        this.path = Paths.stripTrailingSeparator(path);
     }
 
 

@@ -160,4 +160,24 @@ public final class Paths {
     private static String stripRoot(String path) {
         return isAbsolute(path) ? path.substring(1) : path;
     }
+
+    /**
+     * Strip a trailing '/' on a path.
+     *
+     * Items saved in the JCR can be accessed as both /some/path and
+     * /some/path/ but the standard output is w/o the trailing '/'.
+     *
+     * Note that the root path '/' is preserved as '/'.
+     *
+     * @param path The path to be modified
+     * @return The path without a trailing '/' if one is found.
+     */
+    public static String stripTrailingSeparator(String path) {
+        if (path != null && !path.equals(SEPARATOR)) {
+            if (path.lastIndexOf(SEPARATOR) == (path.length() - 1)) {
+                return path.substring(0, path.length() - 1);
+            }
+        }
+        return path;
+    }
 }

@@ -149,19 +149,19 @@ public class SessionImpl implements Session {
 
     @Override
     public boolean itemExists(String absPath) {
-        return itemStore.containsKey(absPath);
+        return itemStore.containsKey(Paths.stripTrailingSeparator(absPath));
     }
 
 
     @Override
     public boolean nodeExists(String absPath) {
-        return itemExists(absPath) && itemStore.get(absPath).isNode();
+        return itemExists(absPath) && itemStore.get(Paths.stripTrailingSeparator(absPath)).isNode();
     }
 
 
     @Override
     public boolean propertyExists(String absPath) {
-        return itemExists(absPath) && !itemStore.get(absPath).isNode();
+        return itemExists(absPath) && !itemStore.get(Paths.stripTrailingSeparator(absPath)).isNode();
     }
 
 
@@ -353,7 +353,7 @@ public class SessionImpl implements Session {
 
 
     private ItemImpl getItemImpl(String absPath) {
-        return itemStore.get(absPath);
+        return itemStore.get(Paths.stripTrailingSeparator(absPath));
     }
 
 
@@ -364,6 +364,9 @@ public class SessionImpl implements Session {
 
 
     private void moveItem(String src, String dest) {
+        src = Paths.stripTrailingSeparator(src);
+        dest = Paths.stripTrailingSeparator(dest);
+
         ItemImpl item = itemStore.get(src);
         item.setPath(dest);
         itemStore.put(dest, item);
