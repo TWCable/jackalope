@@ -65,6 +65,11 @@ public class AssetImpl implements Asset {
         return null;
     }
 
+    @Override
+    public Rendition getImagePreviewRendition() {
+        throw new UnsupportedOperationException();
+    }
+
 
     @Override
     public Rendition getOriginal() {
@@ -189,6 +194,16 @@ public class AssetImpl implements Asset {
     @Override
     public boolean isBatchMode() {
         return false;
+    }
+
+    @Override
+    public String getMetadataValueFromJcr(String s) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getID() {
+        throw new UnsupportedOperationException();
     }
 
 

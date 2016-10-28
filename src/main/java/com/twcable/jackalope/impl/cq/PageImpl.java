@@ -219,6 +219,18 @@ public class PageImpl implements Page {
 
 
     @Override
+    public Calendar getDeleted() {
+        return this.getProperties().get("deleted", Calendar.class);
+    }
+
+
+    @Override
+    public String getDeletedBy() {
+        return this.getProperties().get("deletedBy", String.class);
+    }
+
+
+    @Override
     public String getLastModifiedBy() {
         ValueMap properties = getProperties();
         String lastModifiedBy = properties.get("cq:lastModifiedBy", String.class);

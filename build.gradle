@@ -25,22 +25,18 @@ repositories {
     }
 }
 
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 
 dependencies {
 
-    // AEM's new "uber-jar"
-    compile "com.adobe.aem:aem-api:6.0.0.1", {
-        exclude group: "org.slf4j", module: "slf4j-simple"
-        exclude group: "com.adobe.cq.testing", module: "cq-integration-testing"
-    }
+    compile "com.adobe.aem:uber-jar:6.2.0:apis"
 
     compile "javax.jcr:jcr:2.0"
     compile "com.google.guava:guava:15.0"
-    compile "org.apache.sling:org.apache.sling.jcr.resource:2.3.8"
-    compile "org.slf4j:slf4j-api:1.6.6"
+    compile "org.apache.sling:org.apache.sling.jcr.resource:2.5.0"
+    compile "org.slf4j:slf4j-api:1.7.6"
     compile "javax.servlet:servlet-api:2.5"
     compile "commons-io:commons-io:2.4"
 

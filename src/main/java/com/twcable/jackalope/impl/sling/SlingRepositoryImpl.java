@@ -19,6 +19,8 @@ package com.twcable.jackalope.impl.sling;
 import com.twcable.jackalope.impl.jcr.RepositoryImpl;
 import org.apache.sling.jcr.api.SlingRepository;
 
+import javax.jcr.Credentials;
+import javax.jcr.LoginException;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
@@ -33,6 +35,11 @@ public class SlingRepositoryImpl extends RepositoryImpl implements SlingReposito
     @Override
     public Session loginAdministrative(String workspace) throws RepositoryException {
         return login();
+    }
+
+    @Override
+    public Session impersonateFromService(String s, Credentials credentials, String s1) throws LoginException, RepositoryException {
+        throw new UnsupportedOperationException();
     }
 
 }
