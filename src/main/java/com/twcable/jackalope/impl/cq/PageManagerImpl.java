@@ -124,13 +124,60 @@ public class PageManagerImpl implements PageManager {
     @Override
     public Page move(Page page, String destination, String beforeName, boolean shallow, boolean resolveConflicts,
                      String[] adjustRefs) throws WCMException {
+        return this.move(page, destination, beforeName, shallow, resolveConflicts, adjustRefs, null);
+    }
+
+
+    /**
+     * Moves the given page to the new destination and automatically saves the changes.
+     * If source and destination are equals the page is just ordered.
+     *
+     * @param page            the page to move
+     * @param destination     the path of the new destination
+     * @param beforeName      the name of the next page. if null the page is ordered at the end.
+     * @param shallow         if true only the page content is moved
+     * @param resolveConflict if true resolves name conflict if destination already exists.
+     * @param adjustRefs      list of paths to pages that refer to the moved one. those references will be adjusted.
+     * @param publishRefs     list of referencing paths that will be republished.
+     * @return the new page at the new location
+     * @throws WCMException if an error during this operation occurs.
+     */
+    @Override
+    public Page move(Page page, String destination, String beforeName, boolean shallow, boolean resolveConflict,
+                     String[] adjustRefs, String[] publishRefs) throws WCMException {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
     public Resource move(Resource resource, String destination, String beforeName, boolean shallow, boolean resolveConflicts, String[] adjustRefs) throws WCMException {
+        return this.move(resource, destination, beforeName, shallow, resolveConflicts, adjustRefs, null);
+    }
+
+
+    /**
+     * Moves the given resource to the new destination and automatically saves the changes.
+     * If source and destination are equals the resource is just ordered.
+     *
+     * @param resource        the resource to move
+     * @param destination     the path of the new destination
+     * @param beforeName      the name of the next page. if null the page is ordered at the end.
+     * @param shallow         if true only the resource content is moved.
+     * @param resolveConflict if true resolves name conflict if destination already exists.
+     * @param adjustRefs      list of paths to pages that refer to the moved one. those references will be adjusted.
+     * @param publishRefs     list of referencing paths that will be republished.
+     * @return the new page at the new location
+     * @throws WCMException if an error during this operation occurs.
+     */
+    @Override
+    public Resource move(Resource resource, String destination, String beforeName, boolean shallow, boolean resolveConflict, String[] adjustRefs, String[] publishRefs) throws WCMException {
         throw new UnsupportedOperationException();
+    }
+
+
+    @Override
+    public Resource copy(CopyOptions copyOptions) throws WCMException {
+        return copy(copyOptions.resource, copyOptions.destination, copyOptions.beforeName, copyOptions.shallow, copyOptions.resolveConflict, copyOptions.autoSave);
     }
 
 

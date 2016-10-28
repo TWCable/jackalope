@@ -21,6 +21,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.jcr.api.SlingRepository;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.util.Map;
 
@@ -37,20 +38,30 @@ public class SimpleResourceResolverFactory implements ResourceResolverFactory {
     }
 
 
+    @Nonnull
     @Override
     public ResourceResolver getResourceResolver(Map<String, Object> authenticationInfo) throws LoginException {
         return this.resourceResolver;
     }
 
 
+    @Nonnull
     @Override
     public ResourceResolver getAdministrativeResourceResolver(Map<String, Object> authenticationInfo) throws LoginException {
         return this.resourceResolver;
     }
 
 
+    @Nonnull
     @Override
     public ResourceResolver getServiceResourceResolver(Map<String, Object> authenticationInfo) throws LoginException {
+        return this.resourceResolver;
+    }
+
+
+    @Override
+    @CheckForNull
+    public ResourceResolver getThreadResourceResolver() {
         return this.resourceResolver;
     }
 
