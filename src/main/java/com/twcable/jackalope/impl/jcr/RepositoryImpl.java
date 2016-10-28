@@ -115,4 +115,9 @@ public class RepositoryImpl implements SlingRepository {
         return session;
     }
 
+    @Override
+    public Session impersonateFromService(String s, Credentials credentials, String s1) throws LoginException, RepositoryException {
+        throw new UnsupportedOperationException();
+    }
+
 }

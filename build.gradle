@@ -23,20 +23,15 @@ repositories {
     maven {
         url "http://repo.adobe.com/nexus/content/groups/public"
     }
-
-    // hack to allow getting to a working version of AEM 6.1 uberjar without running afoul of licensing restrictions
-    flatDir { dirs '.' }
 }
 
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 
 dependencies {
 
-    // AEM's new "uber-jar"
-//     compile "com.adobe.aem:uber-jar:6.1.0" // broken
-    compile name: "uberjar-6.1" // install into the top-level dir of project
+    compile "com.adobe.aem:uber-jar:6.2.0:apis"
 
     compile "javax.jcr:jcr:2.0"
     compile "com.google.guava:guava:15.0"

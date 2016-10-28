@@ -220,13 +220,13 @@ public class PageImpl implements Page {
 
     @Override
     public Calendar getDeleted() {
-        throw new UnsupportedOperationException();
+        return this.getProperties().get("deleted", Calendar.class);
     }
 
 
     @Override
     public String getDeletedBy() {
-        throw new UnsupportedOperationException();
+        return this.getProperties().get("deletedBy", String.class);
     }
 
 

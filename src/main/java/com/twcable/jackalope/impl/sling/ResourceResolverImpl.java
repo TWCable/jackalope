@@ -129,6 +129,11 @@ public class ResourceResolverImpl implements ResourceResolver {
         return parent.listChildren();
     }
 
+    @Override
+    public Resource getParent(@Nonnull Resource resource) {
+        return resource.getParent();
+    }
+
 
     @Override
     public Iterable<Resource> getChildren(Resource resource) {
@@ -293,6 +298,16 @@ public class ResourceResolverImpl implements ResourceResolver {
 
     @Override
     public void refresh() {
+    }
+
+    @Override
+    public Resource copy(String s, String s1) throws PersistenceException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Resource move(String s, String s1) throws PersistenceException {
+        throw new UnsupportedOperationException();
     }
 
 
