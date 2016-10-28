@@ -29,9 +29,9 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.apache.sling.jcr.resource.JcrModifiablePropertyMap;
 import org.apache.sling.jcr.resource.JcrPropertyMap;
-import org.apache.sling.jcr.resource.internal.JcrModifiableValueMap;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
@@ -132,7 +132,8 @@ public class NodeResourceImpl extends ItemResourceImpl {
         if (type.equals(Node.class)) return (AdapterType)node;
         if (type.equals(ValueMap.class) || type.equals(Map.class)) return (AdapterType)new JcrPropertyMap(node);
         if (type.equals(PersistableValueMap.class)) return (AdapterType)new JcrModifiablePropertyMap(node);
-        if (type.equals(ModifiableValueMap.class)) return (AdapterType)new JcrModifiableValueMap(node, null);
+        if (type.equals(ModifiableValueMap.class))
+            return (AdapterType)new ModifiableValueMapDecorator(new JcrModifiablePropertyMap(node, null));
 
         if (type.equals(Page.class)) {
             try {
